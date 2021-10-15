@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sonic插件服务</string>
+    <string name="password_text">请输入设备安装密码</string>
+    <string name="tips">默认为sonic123456</string>
+    <string name="button_send">保存</string>
+    <string name="start_service">去开启</string>
+    <string name="apk_auto_intall">Sonic安卓插件后台服务，请保持开启状态</string>
+    <string name="service_name">Sonic插件服务</string>
+    <string name="version">Version：1.0.0</string>
+</resources>
