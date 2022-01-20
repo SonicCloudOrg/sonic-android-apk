@@ -1,0 +1,9 @@
+.gradle
+.idea
+*.iml
+/local.properties
+.DS_Store
+build
+temp
+/.semaphore/
+/.github/

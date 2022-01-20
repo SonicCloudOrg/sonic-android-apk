@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+}
+
+android {
+  compileSdkVersion 31
+
+  signingConfigs {
+    debug {
+      storeFile file('keys/debug.jks')
+      storePassword 'sonic123'
+      keyAlias 'sonickey'
+      keyPassword 'sonic123'
+    }
+  }
+
+  defaultConfig {
+    minSdkVersion 16
+    targetSdkVersion 30
+    versionCode 10
+    versionName "1.1.0"
+    applicationId "org.cloud.sonic.android"
+  }
+
+  buildTypes {
+    debug {
+      signingConfig signingConfigs.debug
+    }
+    release {
+      signingConfig signingConfigs.debug
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+    }
+  }
+  compileOptions {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+  }
+}
+
+dependencies {
+  //TODO consider migrating to androidx
+  //noinspection GradleCompatible
+  implementation 'com.android.support:appcompat-v7:28.0.0'
+  implementation 'com.alibaba:fastjson:1.2.79'
+  compileOnly fileTree(dir: '../shim/libs', include: ['*.jar'])
+}
