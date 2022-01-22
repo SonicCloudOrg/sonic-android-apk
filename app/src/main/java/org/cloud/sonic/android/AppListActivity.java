@@ -48,6 +48,7 @@ public class AppListActivity extends Activity {
             manageClientConnection();
             try {
                 serverSocket.close();
+                Log.i(TAG, "client closed");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -55,17 +56,15 @@ public class AppListActivity extends Activity {
     }
 
     private void manageClientConnection() {
-        while (true) {
-            Log.i(TAG, String.format("Listening on %s", SOCKET));
-            LocalSocket clientSocket;
-            try {
-                clientSocket = serverSocket.accept();
-                Log.d(TAG, "client connected");
-                OutputStream outputStream = clientSocket.getOutputStream();
-                getAllApp(outputStream);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        Log.i(TAG, String.format("Listening on %s", SOCKET));
+        LocalSocket clientSocket;
+        try {
+            clientSocket = serverSocket.accept();
+            Log.d(TAG, "client connected");
+            OutputStream outputStream = clientSocket.getOutputStream();
+            getAllApp(outputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
