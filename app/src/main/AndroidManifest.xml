@@ -44,6 +44,23 @@
       android:exported="true" />
 
     <activity
+      android:name="org.cloud.sonic.android.AudioActivity"
+      android:exported="true"
+      android:showWhenLocked="true"
+      android:turnScreenOn="true">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+
+    <service
+      android:name="org.cloud.sonic.android.AudioService"
+      android:enabled="true"
+      android:exported="false"
+      android:foregroundServiceType="mediaProjection" />
+
+    <activity
       android:name="org.cloud.sonic.android.SearchActivity"
       android:excludeFromRecents="true"
       android:exported="true"
