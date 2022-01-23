@@ -2,6 +2,8 @@
   xmlns:tools="http://schemas.android.com/tools"
   package="org.cloud.sonic.android">
 
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.RECORD_AUDIO" />
   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
   <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
   <uses-permission android:name="android.permission.READ_PHONE_STATE" />

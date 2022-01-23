@@ -1,6 +1,9 @@
 <resources>
-    <string name="app_name">Sonic助手</string>
-    <string name="service_ticker">Sonic Plugin running</string>
-    <string name="service_title">Sonic Plugin</string>
-    <string name="service_text">Sonic Plugin is running.</string>
+  <string name="app_name">Sonic助手</string>
+  <string name="service_ticker">Sonic Service running</string>
+  <string name="service_title">Sonic Service</string>
+  <string name="service_text">Sonic Service is running.</string>
+  <string name="notification_waiting">Sonic Service Waiting for connection…</string>
+  <string name="notification_forwarding">Audio Service forwarding enabled</string>
+  <string name="action_stop">Stop</string>
 </resources>
