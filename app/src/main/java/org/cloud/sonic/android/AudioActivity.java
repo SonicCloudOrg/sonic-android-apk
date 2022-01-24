@@ -38,6 +38,7 @@ public class AudioActivity extends Activity {
         if (requestCode == REQUEST_CODE_START_CAPTURE && resultCode == Activity.RESULT_OK) {
             AudioService.start(this, data);
         }
+        //exit
         finish();
     }
 }

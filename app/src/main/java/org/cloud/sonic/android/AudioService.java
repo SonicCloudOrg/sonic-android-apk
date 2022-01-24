@@ -81,6 +81,7 @@ public class AudioService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
         if (ACTION_STOP.equals(action)) {
+            //exit
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -155,6 +156,7 @@ public class AudioService extends Service {
     @SuppressLint("NewApi")
     private static AudioFormat createAudioFormat() {
         AudioFormat.Builder builder = new AudioFormat.Builder();
+        //raw pcm 16bit
         builder.setEncoding(AudioFormat.ENCODING_PCM_16BIT);
         builder.setSampleRate(SAMPLE_RATE);
         builder.setChannelMask(CHANNELS == 2 ? AudioFormat.CHANNEL_IN_STEREO : AudioFormat.CHANNEL_IN_MONO);
@@ -170,6 +172,7 @@ public class AudioService extends Service {
         return builder.build();
     }
 
+    //record audio
     private void startRecording() {
         final AudioRecord recorder = createAudioRecord(mediaProjection);
 
@@ -227,7 +230,6 @@ public class AudioService extends Service {
         @Override
         public void handleMessage(Message message) {
             if (!service.isRunning()) {
-                // if the VPN is not running anymore, ignore obsolete events
                 return;
             }
 
