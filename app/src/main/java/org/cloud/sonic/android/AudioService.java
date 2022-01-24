@@ -56,10 +56,10 @@ public class AudioService extends Service {
     private Thread recorderThread;
 
     @SuppressLint("NewApi")
-    public static void start(Context context) {
+    public static void start(Context context, Intent data) {
         Intent intent = new Intent(context, AudioService.class);
         intent.setAction(ACTION_RECORD);
-//        intent.putExtra(EXTRA_MEDIA_PROJECTION_DATA, data);
+        intent.putExtra(EXTRA_MEDIA_PROJECTION_DATA, data);
         context.startForegroundService(intent);
     }
 
