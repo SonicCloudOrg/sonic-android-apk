@@ -30,6 +30,7 @@ import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * @author Eason, sndcpy
@@ -189,6 +190,45 @@ public class AudioService extends Service {
         }
         mediaCodec.configure(encodeFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         mediaCodec.start();
+    }
+
+    @SuppressLint("NewApi")
+    private void encodePCMToAAC(byte[] bytes) throws IOException {
+        int inputBufIndex = mediaCodec.dequeueInputBuffer(1000);
+        if (inputBufIndex >= 0) {
+            ByteBuffer mInputBuffer = mediaCodec.getInputBuffer(inputBufIndex);
+            mInputBuffer.clear();
+            mInputBuffer.put(bytes, 0, 1024 * 1024);
+            mediaCodec.queueInputBuffer(inputBufIndex, 0, 1024 * 1024, (1000000 * mEncodedSize / AUDIO_BYTE_PER_SAMPLE), 0);
+            mEncodedSize += BUFFER_SIZE_IN_BYTES;
+        }
+
+        int outputBufIndex = mAudioEncoder.dequeueOutputBuffer(mOutBufferInfo, 1000);
+        if (outputBufIndex >= 0) {
+            mOutBuffer = mAudioOutputBuffers[outputBufIndex];
+            if ((mOutBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
+                // 这里可以从ByteBuffer中获取csd参数
+                mAudioEncoder.releaseOutputBuffer(outputBufIndex, false);
+                return;
+            }
+            if (mOutBufferInfo.size != 0 && mLastAudioPresentationTimeUs < mOutBufferInfo.presentationTimeUs) {
+                mOutBuffer.position(mOutBufferInfo.offset);
+                mOutBuffer.limit(mOutBufferInfo.offset + mOutBufferInfo.size);
+
+                addADTStoPacket(mADTSHeader, mOutBufferInfo.size + 7);
+                mMixedFileOutputStream.write(mADTSHeader);
+
+                mOutBuffer.get(mEncodedBytes, 0, mOutBufferInfo.size);
+                mOutBuffer.clear();
+                mMixedFileOutputStream.write(mEncodedBytes, 0, mOutBufferInfo.size);
+
+                mLastAudioPresentationTimeUs = mOutBufferInfo.presentationTimeUs;
+            }
+
+            mAudioEncoder.releaseOutputBuffer(outputBufIndex, false);
+        } else if (outputBufIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+            mAudioOutputBuffers = mAudioEncoder.getOutputBuffers();
+        }
     }
 
     //record audio
