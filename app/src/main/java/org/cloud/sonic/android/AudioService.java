@@ -15,6 +15,9 @@ import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioPlaybackCaptureConfiguration;
 import android.media.AudioRecord;
+import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
+import android.media.MediaFormat;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.LocalServerSocket;
@@ -170,6 +173,22 @@ public class AudioService extends Service {
         builder.setBufferSizeInBytes(1024 * 1024);
         builder.setAudioPlaybackCaptureConfig(createAudioPlaybackCaptureConfig(mediaProjection));
         return builder.build();
+    }
+
+    private MediaCodec mediaCodec;
+
+    private void initTransferACC(){
+        MediaFormat encodeFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, 16000, 1);//参数对应-> mime type、采样率、声道数
+        encodeFormat.setInteger(MediaFormat.KEY_BIT_RATE, 128 * 100);//比特率
+        encodeFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+        encodeFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 16*1024);
+        try {
+            mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mediaCodec.configure(encodeFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        mediaCodec.start();
     }
 
     //record audio
