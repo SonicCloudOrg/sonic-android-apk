@@ -2,6 +2,9 @@
   xmlns:tools="http://schemas.android.com/tools"
   package="org.cloud.sonic.android">
 
+  <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+  <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+    tools:ignore="ProtectedPermissions" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -58,7 +61,8 @@
       android:name="org.cloud.sonic.android.AudioService"
       android:enabled="true"
       android:exported="false"
-      android:foregroundServiceType="mediaProjection" />
+      android:foregroundServiceType="mediaProjection" >
+    </service>
 
     <activity
       android:name="org.cloud.sonic.android.SearchActivity"
