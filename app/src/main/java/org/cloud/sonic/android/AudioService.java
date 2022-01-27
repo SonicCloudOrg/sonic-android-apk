@@ -270,26 +270,24 @@ public class AudioService extends Service {
     private void startRecording() {
         final AudioRecord recorder = createAudioRecord(mediaProjection);
 
-        recorderThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try (LocalSocket socket = connect()) {
-                    handler.sendEmptyMessage(MSG_CONNECTION_ESTABLISHED);
+        //try not thread
+        recorderThread = new Thread(() -> {
+            try (LocalSocket socket = connect()) {
+                handler.sendEmptyMessage(MSG_CONNECTION_ESTABLISHED);
 
-                    recorder.startRecording();
-                    int BUFFER_MS = 15; // do not buffer more than BUFFER_MS milliseconds
-                    byte[] buf = new byte[SAMPLE_RATE * CHANNELS * BUFFER_MS / 1000];
-                    while (true) {
-                        int r = recorder.read(buf, 0, buf.length);
+                recorder.startRecording();
+                int BUFFER_MS = 15; // do not buffer more than BUFFER_MS milliseconds
+                byte[] buf = new byte[SAMPLE_RATE * CHANNELS * BUFFER_MS / 1000];
+                while (true) {
+                    int r = recorder.read(buf, 0, buf.length);
 //                        encodePCMToAAC(buf,socket.getOutputStream());
-                        socket.getOutputStream().write(buf, 0, r);
-                    }
-                } catch (IOException e) {
-                    // ignore
-                } finally {
-                    recorder.stop();
-                    stopSelf();
+                    socket.getOutputStream().write(buf, 0, r);
                 }
+            } catch (IOException e) {
+                // ignore
+            } finally {
+                recorder.stop();
+                stopSelf();
             }
         });
         recorderThread.start();
