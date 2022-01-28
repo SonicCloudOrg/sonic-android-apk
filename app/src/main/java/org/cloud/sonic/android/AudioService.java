@@ -266,6 +266,8 @@ public class AudioService extends Service {
 //        packet[6] = (byte) 0xFC;
 //    }
 
+    //try wav
+
     //record audio
     private void startRecording() {
         final AudioRecord recorder = createAudioRecord(mediaProjection);
