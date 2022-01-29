@@ -28,7 +28,7 @@ public class WavHeader {
     final String dataChunkId = "data";
     int dataChunkSize;
 
-    WavHeader(int totalAudioLen, int sampleRate, short channels, short sampleBits) {
+    public WavHeader(int totalAudioLen, int sampleRate, short channels, short sampleBits) {
         this.riffChunkSize = totalAudioLen;
         this.channels = channels;
         this.sampleRate = sampleRate;
