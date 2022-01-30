@@ -2,6 +2,9 @@ package org.cloud.sonic.android.models;
 
 import org.cloud.sonic.android.util.ByteUtils;
 
+/**
+ *
+ */
 public class WavHeader {
     /**
      * RIFF数据块
