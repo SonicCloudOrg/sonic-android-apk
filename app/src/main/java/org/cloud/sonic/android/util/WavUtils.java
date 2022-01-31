@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.logging.Logger;
 
+/**
+ * 生成头字节
+ */
 public class WavUtils {
     private static final String TAG = WavUtils.class.getSimpleName();
 
