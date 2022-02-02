@@ -4,7 +4,7 @@
 <p align="center">🎉Android Plugin of Sonic cloud real machine testing platform.</p>
 
 ## 背景与灵感
-> 当前sonic-android-apk仓库灵感来源于[STFService.apk](https://github.com/DeviceFarmer/STFService.apk)，代码基于stf的STFService.apk进行扩展和去除不需要的功能。
+> 当前sonic-android-apk仓库灵感来源于[STFService.apk](https://github.com/DeviceFarmer/STFService.apk)，对其部分代码进行扩展和去除不需要的模块。
 >
 > 非常感谢STF和Scrcpy提供的思路！Sonic后续会建设更多不一样的新功能，以便于跟Sonic更好的交互。
 
