@@ -23,16 +23,23 @@ import android.media.projection.MediaProjectionManager;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
+
+import org.cloud.sonic.android.recorder.mp3.Mp3EncodeThread;
+import org.cloud.sonic.android.recorder.utils.ByteUtils;
+import org.cloud.sonic.android.recorder.utils.FileUtils;
+import org.cloud.sonic.android.recorder.utils.Logger;
+
+import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 /**
  * @author Eason, sndcpy
@@ -61,6 +68,9 @@ public class AudioService extends Service {
     private MediaProjection mediaProjection;
     private Thread recorderThread;
 //    private long presentationTimeUs;
+
+    private Mp3EncodeThread mp3EncodeThread;
+
 
     @SuppressLint("NewApi")
     public static void start(Context context, Intent data) {
@@ -268,28 +278,43 @@ public class AudioService extends Service {
 
     //try wav
 
+    private void initMp3EncoderThread() {
+        try {
+            mp3EncodeThread = new Mp3EncodeThread(new File(getTempFilePath()), 1024 * 1024);
+            mp3EncodeThread.start();
+        } catch (Exception e) {
+            Logger.e(e, TAG, e.getMessage());
+        }
+    }
+
     //record audio
     private void startRecording() {
         final AudioRecord recorder = createAudioRecord(mediaProjection);
 
         //try not thread
         recorderThread = new Thread(() -> {
+            initMp3EncoderThread();
             try (LocalSocket socket = connect()) {
                 handler.sendEmptyMessage(MSG_CONNECTION_ESTABLISHED);
 
                 recorder.startRecording();
                 int BUFFER_MS = 15; // do not buffer more than BUFFER_MS milliseconds
-                byte[] buf = new byte[SAMPLE_RATE * CHANNELS * BUFFER_MS / 1000];
+                short[] buf = new short[SAMPLE_RATE * CHANNELS * BUFFER_MS / 1000];
                 while (true) {
                     int r = recorder.read(buf, 0, buf.length);
 //                        encodePCMToAAC(buf,socket.getOutputStream());
-                    socket.getOutputStream().write(buf, 0, r);
+                    if (mp3EncodeThread != null) {
+                        mp3EncodeThread.addChangeBuffer(new Mp3EncodeThread.ChangeBuffer(buf, r));
+                    }
+
+                    socket.getOutputStream().write(ByteUtils.toBytes(buf), 0, r);
                 }
             } catch (IOException e) {
                 // ignore
             } finally {
                 recorder.stop();
                 stopSelf();
+                stopMp3Encoded();
             }
         });
         recorderThread.start();
@@ -332,6 +357,32 @@ public class AudioService extends Service {
                 Notification notification = service.createNotification(true);
                 service.getNotificationManager().notify(NOTIFICATION_ID, notification);
             }
+        }
+    }
+
+    /**
+     * 根据当前的时间生成相应的文件名
+     * 实例 record_20160101_13_15_12
+     */
+    private String getTempFilePath() {
+        String fileDir = String.format(Locale.getDefault(), "%s/Record/", Environment.getExternalStorageDirectory().getAbsolutePath());
+        if (!FileUtils.createOrExistsDir(fileDir)) {
+            Logger.e(TAG, "文件夹创建失败：%s", fileDir);
+        }
+        String fileName = String.format(Locale.getDefault(), "record_tmp_%s", FileUtils.getNowString(new SimpleDateFormat("yyyyMMdd_HH_mm_ss", Locale.SIMPLIFIED_CHINESE)));
+        return String.format(Locale.getDefault(), "%s%s.pcm", fileDir, fileName);
+    }
+
+    private void stopMp3Encoded() {
+        if (mp3EncodeThread != null) {
+            mp3EncodeThread.stopSafe(new Mp3EncodeThread.EncordFinishListener() {
+                @Override
+                public void onFinish() {
+                    mp3EncodeThread = null;
+                }
+            });
+        } else {
+            Logger.e(TAG, "mp3EncodeThread is null, 代码业务流程有误，请检查！！ ");
         }
     }
 }
