@@ -24,26 +24,21 @@ import android.media.projection.MediaProjectionManager;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
-
-import org.cloud.sonic.android.recorder.mp3.Mp3EncodeThread;
-import org.cloud.sonic.android.recorder.utils.ByteUtils;
-import org.cloud.sonic.android.recorder.utils.FileUtils;
 import org.cloud.sonic.android.recorder.utils.Logger;
+import org.cloud.sonic.android.util.ADTSUtil;
 
-import java.io.DataInputStream;
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Locale;
 
 /**
  * @author Eason, sndcpy
@@ -64,19 +59,26 @@ public class AudioService extends Service {
     private static final String SOCKET_NAME = "sonicaudioservice";
 
 
-    private static final int SAMPLE_RATE = 48000;
+    private static final int SAMPLE_RATE = 44100;
     private static final int CHANNELS = 2;
 
     private final Handler handler = new ConnectionHandler(this);
     private MediaProjectionManager mediaProjectionManager;
     private MediaProjection mediaProjection;
-    private Thread recorderThread;
-//    private long presentationTimeUs;
     // 处理 AAC 录制音频
-    private MediaRecorder mediaRecorder;
-    // 处理录制时候的数据流
-    private ParcelFileDescriptor parcelWrite;
-    private DataInputStream inputStream;
+    private MediaCodec mMediaCodec;
+    private AudioRecord mAudioRecord;
+
+
+    private final Handler mHandler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+            String dispMesg = (String) msg.obj;
+            if (ACTION_STOP.equals(dispMesg)) {
+                stopSelf();
+            }
+        }
+    };
+
 
     @SuppressLint("NewApi")
     public static void start(Context context, Intent data) {
@@ -90,7 +92,6 @@ public class AudioService extends Service {
     @SuppressLint("NewApi")
     public void onCreate() {
         super.onCreate();
-//        initTransferACC();
         Notification notification = createNotification(false);
 
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, getString(R.string.app_name), NotificationManager.IMPORTANCE_NONE);
@@ -116,12 +117,18 @@ public class AudioService extends Service {
         Intent data = intent.getParcelableExtra(EXTRA_MEDIA_PROJECTION_DATA);
         mediaProjectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
         mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, data);
+
         if (mediaProjection != null) {
             startRecording();
+            //必须要在子线程里接收消息
+            new Thread(this::acceptMsg).start();
         } else {
             Log.w(TAG, "Failed to capture audio");
             stopSelf();
         }
+
+
+
         return START_NOT_STICKY;
     }
 
@@ -195,78 +202,123 @@ public class AudioService extends Service {
         return builder.build();
     }
 
-    private MediaRecorder createMediaRecorder(AudioRecord recorder){
-        MediaRecorder mediaRecorder = new MediaRecorder();
-        //配置采集方式，这里用的是麦克风的采集方式
-        mediaRecorder.setAudioSource(recorder.getAudioSource());
-        //配置输出方式，这里用的是AAC
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
-        //配置采样频率，频率越高月接近原始声音，Android所有设备都支持的采样频率为44100
-        mediaRecorder.setAudioSamplingRate(44100);
-        //配置文件的编码格式,AAC是比较通用的编码格式
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-        //配置码率，这里一般通用的是96000
-        mediaRecorder.setAudioEncodingBitRate(96000);
-        //设置获取音频流的方式
-        mediaRecorder.setOutputFile(parcelWrite.getFileDescriptor());
-        return mediaRecorder;
+    //record audio
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void startRecording() {
+        mAudioRecord = createAudioRecord(mediaProjection);
+        mAudioRecord.startRecording();
+        recordInternalAudio(mAudioRecord);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    void recordInternalAudio(AudioRecord audioRecord) {
+        try {
+            mMediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC);
+            MediaFormat mediaFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, SAMPLE_RATE, CHANNELS);
+            mediaFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+            mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, 196000);
+            mediaFormat.setInteger(MediaFormat.KEY_PCM_ENCODING, AudioFormat.ENCODING_PCM_16BIT);
+            ADTSUtil.initADTS(SAMPLE_RATE, CHANNELS);
+            mMediaCodec.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            final int[] totalBytesRead = {0};
+            final Long[] mPresentationTime = {0L};
+            int trackId = 0;
+            mMediaCodec.setCallback(new MediaCodec.Callback() {
 
-    //record audio
-    private void startRecording() {
-        //处理线性输出
-        intPipLine();
-        final AudioRecord recorder = createAudioRecord(mediaProjection);
-        mediaRecorder = createMediaRecorder(recorder);
-
-        //try not thread
-        recorderThread = new Thread(() -> {
-
-            try (LocalSocket socket = connect()) {
-                handler.sendEmptyMessage(MSG_CONNECTION_ESTABLISHED);
-                mediaRecorder.prepare();
-                mediaRecorder.start();
-//                recorder.startRecording();
-//                int BUFFER_MS = 15; // do not buffer more than BUFFER_MS milliseconds
-                byte[] buffer = new byte[900];
-//                short[] buf = new short[SAMPLE_RATE * CHANNELS * BUFFER_MS / 1000];
-                while (true) {
-//                    int r = recorder.read(buf, 0, buf.length);
-                    int read = inputStream.read(buffer);
-//                        encodePCMToAAC(buf,socket.getOutputStream());
-                    if (read != -1) {
-                        byte[] data = Arrays.copyOfRange(buffer, 0, read);
-                        socket.getOutputStream().write(data, 0, read);
+                @Override
+                public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int i) {
+                    ByteBuffer codecInputBuffer = mediaCodec.getInputBuffer(i);
+                    int capacity = codecInputBuffer.capacity();
+                    byte[] buffer = new byte[capacity];
+                    int readBytes = audioRecord.read(buffer, 0, buffer.length);
+                    if (readBytes > 0) {
+                        codecInputBuffer.put(buffer, 0, readBytes);
+                        mediaCodec.queueInputBuffer(i, 0, readBytes, mPresentationTime[0], 0);
+                        totalBytesRead[0] += readBytes;
+                        mPresentationTime[0] = 1000000L * (totalBytesRead[0] / 2) / 44100;
                     }
                 }
-            } catch (IOException e) {
-                // ignore
-            } finally {
-//                recorder.stop();
-                mediaRecorder.stop();
-                stopSelf();
-            }
-        });
-        recorderThread.start();
+
+                @Override
+                public void onOutputBufferAvailable(@NonNull MediaCodec codec, int outputBufferIndex, @NonNull MediaCodec.BufferInfo mBufferInfo) {
+                    if (mBufferInfo.flags == MediaCodec.BUFFER_FLAG_CODEC_CONFIG) {
+                        Logger.i("AudioService", "AAC的配置数据");
+                    } else {
+                        byte[] oneADTSFrameBytes = new byte[7 + mBufferInfo.size];
+                        ADTSUtil.addADTS(oneADTSFrameBytes);
+                        ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferIndex);
+                        outputBuffer.get(oneADTSFrameBytes, 7, mBufferInfo.size);
+                        try (LocalSocket socket = connect()) {
+                            socket.getOutputStream().write(oneADTSFrameBytes, 0, oneADTSFrameBytes.length);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                @Override
+                public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
+
+                    e.printStackTrace();
+                    stopSelf();
+                }
+
+                @Override
+                public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
+
+                }
+            });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mMediaCodec.start();
+
     }
 
     private boolean isRunning() {
-        return recorderThread != null;
+        return true;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mediaProjection.stop();
+        mAudioRecord.release();
+        mMediaCodec.stop();
+        mMediaCodec.release();
         stopForeground(true);
-        if (recorderThread != null) {
-            recorderThread.interrupt();
-            recorderThread = null;
-        }
+
     }
 
     private NotificationManager getNotificationManager() {
         return (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private void acceptMsg() {
+        InputStream mInputStream = null;
+        try (LocalSocket mSocket = connect()) {
+            while (true) {
+                try {
+                    byte[] buffer = new byte[1024];
+                    mInputStream = mSocket.getInputStream();
+                    int count = mInputStream.read(buffer);
+                    String key = new String(Arrays.copyOfRange(buffer, 0, count));
+                    Log.d(TAG, "ServerActivity mSocketOutStream==" + key);
+                    Message msg = mHandler.obtainMessage();
+                    msg.obj = key;
+                    msg.sendToTarget();
+                } catch (IOException e) {
+                    Log.d(TAG, "exception==" + e.fillInStackTrace().getMessage());
+                    e.printStackTrace();
+                }
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }/**/
     }
 
     private static final class ConnectionHandler extends Handler {
@@ -288,17 +340,6 @@ public class AudioService extends Service {
                 Notification notification = service.createNotification(true);
                 service.getNotificationManager().notify(NOTIFICATION_ID, notification);
             }
-        }
-    }
-
-    private void intPipLine() {
-        try {
-            ParcelFileDescriptor[] parcelFileDescriptors = ParcelFileDescriptor.createPipe();
-            ParcelFileDescriptor parcelRead = new ParcelFileDescriptor(parcelFileDescriptors[0]);
-            parcelWrite = new ParcelFileDescriptor(parcelFileDescriptors[1]);
-            inputStream = new DataInputStream(new ParcelFileDescriptor.AutoCloseInputStream(parcelRead));
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
