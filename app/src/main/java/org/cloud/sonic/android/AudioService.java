@@ -25,6 +25,7 @@ import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -67,6 +68,10 @@ public class AudioService extends Service {
     // 处理 AAC 录制音频
     private MediaCodec mMediaCodec;
     private AudioRecord mAudioRecord;
+
+    //子线程处理 转录音频
+    private Handler mAudioEncoderHandler;
+    private HandlerThread mAudioEncoderHandlerThread = new HandlerThread("AudioEncoder");
 
 
     private final Handler mHandler = new Handler() {
@@ -113,11 +118,15 @@ public class AudioService extends Service {
             return START_NOT_STICKY;
         }
 
+
+
         Intent data = intent.getParcelableExtra(EXTRA_MEDIA_PROJECTION_DATA);
         mediaProjectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
         mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, data);
 
         if (mediaProjection != null) {
+            mAudioEncoderHandlerThread.start();
+            mAudioEncoderHandler = new Handler(mAudioEncoderHandlerThread.getLooper());
             startRecording();
             //必须要在子线程里接收消息
             new Thread(this::acceptMsg).start();
@@ -202,14 +211,14 @@ public class AudioService extends Service {
     }
 
     //record audio
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void startRecording() {
         mAudioRecord = createAudioRecord(mediaProjection);
         mAudioRecord.startRecording();
         recordInternalAudio(mAudioRecord);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(api = Build.VERSION_CODES.M)
     void recordInternalAudio(AudioRecord audioRecord) {
         try {
             mMediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC);
@@ -266,7 +275,7 @@ public class AudioService extends Service {
                 public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
 
                 }
-            });
+            },mAudioEncoderHandler);
 
         } catch (IOException e) {
             e.printStackTrace();
