@@ -41,8 +41,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
- * @author Eason, sndcpy
- * More https://github.com/rom1v/sndcpy
+ * @author Eason, Jeffrey.Wang
  */
 public class AudioService extends Service {
 
