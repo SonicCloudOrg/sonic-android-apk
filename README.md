@@ -18,7 +18,14 @@
 > 3. PCM格式音频进行ACC转码
 > 4. 横竖屏实时监听
 > 5. 剪切板管理优化（doing）
-> 6. 其他扩展
+> 6. 网络抓包（doing）
+> 7. 一键连接wifi（doing）
+> 8. 其他扩展
+
+### Build
+```
+gradlew assembleDebug
+```
 
 ### 开源协议
 
