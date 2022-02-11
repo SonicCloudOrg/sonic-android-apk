@@ -1,5 +1,7 @@
 package org.cloud.sonic.android;
 
+import static android.net.LocalSocket.SOCKET_DGRAM;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Notification;
@@ -23,6 +25,7 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -32,14 +35,20 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
+
 import org.cloud.sonic.android.recorder.utils.Logger;
 import org.cloud.sonic.android.util.ADTSUtil;
+import org.cloud.sonic.android.util.LocalServerUtil;
+import org.cloud.sonic.android.util.ThreadUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author Eason, Jeffrey.Wang
@@ -56,8 +65,6 @@ public class AudioService extends Service {
 
     private static final int MSG_CONNECTION_ESTABLISHED = 1;
 
-    private static final String SOCKET_NAME = "sonicaudioservice";
-
 
     private static final int SAMPLE_RATE = 44100;
     private static final int CHANNELS = 2;
@@ -69,9 +76,12 @@ public class AudioService extends Service {
     private MediaCodec mMediaCodec;
     private AudioRecord mAudioRecord;
 
-    //子线程处理 转录音频
-    private Handler mAudioEncoderHandler;
-    private HandlerThread mAudioEncoderHandlerThread = new HandlerThread("AudioEncoder");
+    private LocalSocket inComingSock;
+
+    private LinkedBlockingQueue mRunnables = new LinkedBlockingQueue<Runnable>();
+    private Thread workThread;
+
+    private int mBufferSize = 4 * 1024;
 
 
     private final Handler mHandler = new Handler() {
@@ -114,19 +124,17 @@ public class AudioService extends Service {
             return START_NOT_STICKY;
         }
 
-        if (isRunning()) {
-            return START_NOT_STICKY;
-        }
+//        if (isRunning()) {
+//            return START_NOT_STICKY;
+//        }
 
-
+//        Logger.i("wzasd",connectSock() + "");
 
         Intent data = intent.getParcelableExtra(EXTRA_MEDIA_PROJECTION_DATA);
         mediaProjectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
         mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, data);
 
         if (mediaProjection != null) {
-            mAudioEncoderHandlerThread.start();
-            mAudioEncoderHandler = new Handler(mAudioEncoderHandlerThread.getLooper());
             startRecording();
             //必须要在子线程里接收消息
             new Thread(this::acceptMsg).start();
@@ -134,9 +142,6 @@ public class AudioService extends Service {
             Log.w(TAG, "Failed to capture audio");
             stopSelf();
         }
-
-
-
         return START_NOT_STICKY;
     }
 
@@ -174,7 +179,7 @@ public class AudioService extends Service {
     }
 
     private static LocalSocket connect() throws IOException {
-        LocalServerSocket localServerSocket = new LocalServerSocket(SOCKET_NAME);
+        LocalServerSocket localServerSocket = new LocalServerSocket("");
         try {
             return localServerSocket.accept();
         } finally {
@@ -213,8 +218,26 @@ public class AudioService extends Service {
     //record audio
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void startRecording() {
+        workThread =  new Thread("publish-thread") {
+            @Override
+            public void run() {
+                while (!interrupted()) {
+                    try {
+                        Runnable runnable = (Runnable) mRunnables.take();
+                        runnable.run();
+                    } catch ( InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                mRunnables.clear();
+                Log.d("MediaPublisher", "= =lgd= Rtmp发布线程退出...");
+            }
+        };
+        workThread.start();
+
         mAudioRecord = createAudioRecord(mediaProjection);
         mAudioRecord.startRecording();
+
         recordInternalAudio(mAudioRecord);
     }
 
@@ -230,9 +253,8 @@ public class AudioService extends Service {
             mMediaCodec.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             final int[] totalBytesRead = {0};
             final Long[] mPresentationTime = {0L};
-            int trackId = 0;
-            mMediaCodec.setCallback(new MediaCodec.Callback() {
 
+            mMediaCodec.setCallback(new MediaCodec.Callback() {
                 @Override
                 public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int i) {
                     ByteBuffer codecInputBuffer = mediaCodec.getInputBuffer(i);
@@ -256,17 +278,37 @@ public class AudioService extends Service {
                         ADTSUtil.addADTS(oneADTSFrameBytes);
                         ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferIndex);
                         outputBuffer.get(oneADTSFrameBytes, 7, mBufferInfo.size);
-                        try (LocalSocket socket = connect()) {
-                            socket.getOutputStream().write(oneADTSFrameBytes, 0, oneADTSFrameBytes.length);
-                        } catch (IOException e) {
+                        Logger.i("inComingSock", "outputBuffer");
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                try  {
+                                    LocalSocket localSocket = new LocalSocket();
+                                    localSocket.connect(new LocalSocketAddress("sonicaudioservice"));
+                                    OutputStream os = localSocket.getOutputStream();
+                                    os.write(oneADTSFrameBytes, 0, outputBufferIndex);
+                                    localSocket.close();
+                                }catch (IOException e) {
+                                    // ignore
+                                    Logger.e("inComingSock", e.getMessage());
+
+                                }
+                                Logger.i("inComingSock", "outPutAACData len"+oneADTSFrameBytes.length);
+                            }
+                        };
+                        try {
+                            mRunnables.put(runnable);
+                        } catch (InterruptedException e) {
+                            Log.e(TAG, " =lgd= outputAudioData=====error: "+e.toString());
                             e.printStackTrace();
                         }
+
                     }
+                    codec.releaseOutputBuffer(outputBufferIndex, false);
                 }
 
                 @Override
                 public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
-
                     e.printStackTrace();
                     stopSelf();
                 }
@@ -275,13 +317,12 @@ public class AudioService extends Service {
                 public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
 
                 }
-            },mAudioEncoderHandler);
+            });
 
         } catch (IOException e) {
             e.printStackTrace();
         }
         mMediaCodec.start();
-
     }
 
     private boolean isRunning() {
@@ -307,27 +348,28 @@ public class AudioService extends Service {
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     private void acceptMsg() {
-        InputStream mInputStream = null;
-        try (LocalSocket mSocket = connect()) {
-            while (true) {
-                try {
-                    byte[] buffer = new byte[1024];
-                    mInputStream = mSocket.getInputStream();
-                    int count = mInputStream.read(buffer);
-                    String key = new String(Arrays.copyOfRange(buffer, 0, count));
-                    Log.d(TAG, "ServerActivity mSocketOutStream==" + key);
-                    Message msg = mHandler.obtainMessage();
-                    msg.obj = key;
-                    msg.sendToTarget();
-                } catch (IOException e) {
-                    Log.d(TAG, "exception==" + e.fillInStackTrace().getMessage());
-                    e.printStackTrace();
-                }
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }/**/
+//        InputStream mInputStream = null;
+//        try (LocalSocket mSocket = connect()) {
+//            while (true) {
+//                try {
+//                    byte[] buffer = new byte[1024];
+//                    mInputStream = mSocket.getInputStream();
+//                    int count = mInputStream.read(buffer);
+//                    String key = new String(Arrays.copyOfRange(buffer, 0, count));
+//                    Log.d(TAG, "ServerActivity mSocketOutStream==" + key);
+//                    Message msg = mHandler.obtainMessage();
+//                    msg.obj = key;
+//                    msg.sendToTarget();
+//                } catch (IOException e) {
+//                    Log.d(TAG, "exception==" + e.fillInStackTrace().getMessage());
+//                    e.printStackTrace();
+//                }
+//            }
+//        } catch (IOException e1) {
+//            e1.printStackTrace();
+//        }/**/
     }
+
 
     private static final class ConnectionHandler extends Handler {
 
@@ -350,4 +392,5 @@ public class AudioService extends Service {
             }
         }
     }
+
 }
