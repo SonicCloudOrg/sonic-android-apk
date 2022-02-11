@@ -35,11 +35,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
-
 import org.cloud.sonic.android.recorder.utils.Logger;
 import org.cloud.sonic.android.util.ADTSUtil;
-import org.cloud.sonic.android.util.LocalServerUtil;
-import org.cloud.sonic.android.util.ThreadUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
