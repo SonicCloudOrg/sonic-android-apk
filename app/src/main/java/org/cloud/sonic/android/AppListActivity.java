@@ -28,6 +28,9 @@ public class AppListActivity extends Activity {
     private static final String SOCKET = "sonicapplistservice";
     private LocalServerSocket serverSocket;
 
+    /** 数据缓冲大小 */
+    private static final int BUFFER_SIZE = 500000;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +63,9 @@ public class AppListActivity extends Activity {
         LocalSocket clientSocket;
         try {
             clientSocket = serverSocket.accept();
+            //设置缓冲大小
+            clientSocket.setReceiveBufferSize(BUFFER_SIZE);
+            clientSocket.setSendBufferSize(BUFFER_SIZE);
             Log.d(TAG, "client connected");
             OutputStream outputStream = clientSocket.getOutputStream();
             getAllApp(outputStream);
