@@ -7,6 +7,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -17,6 +18,7 @@ import org.cloud.sonic.android.util.ImgUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -28,7 +30,9 @@ public class AppListActivity extends Activity {
     private static final String SOCKET = "sonicapplistservice";
     private LocalServerSocket serverSocket;
 
-    /** 数据缓冲大小 */
+    /**
+     * 数据缓冲大小
+     */
     private static final int BUFFER_SIZE = 500000;
 
     @Override
@@ -82,7 +86,11 @@ public class AppListActivity extends Activity {
             if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 AppInfo tmpInfo = new AppInfo();
                 tmpInfo.appName = packageInfo.applicationInfo.loadLabel(getPackageManager()).toString();
-                tmpInfo.packageName = packageInfo.packageName;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    tmpInfo.packageName = new String(packageInfo.packageName.getBytes(StandardCharsets.UTF_8));
+                } else {
+                    tmpInfo.packageName = packageInfo.packageName;
+                }
                 tmpInfo.versionName = packageInfo.versionName;
                 tmpInfo.versionCode = packageInfo.versionCode;
                 tmpInfo.appIcon = ImgUtil.drawableToDataUri(packageInfo.applicationInfo.loadIcon(getPackageManager()));
