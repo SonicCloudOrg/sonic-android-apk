@@ -7,7 +7,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -18,7 +17,6 @@ import org.cloud.sonic.android.util.ImgUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -31,9 +29,9 @@ public class AppListActivity extends Activity {
     private LocalServerSocket serverSocket;
 
     /**
-     * 数据缓冲大小
+     * 数据缓冲大小，因为无法关闭Nagle，所以该参数没有意义
      */
-    private static final int BUFFER_SIZE = 500000;
+    private static final int BUFFER_SIZE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,16 +84,25 @@ public class AppListActivity extends Activity {
             if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 AppInfo tmpInfo = new AppInfo();
                 tmpInfo.appName = packageInfo.applicationInfo.loadLabel(getPackageManager()).toString();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    tmpInfo.packageName = new String(packageInfo.packageName.getBytes(StandardCharsets.UTF_8));
-                } else {
-                    tmpInfo.packageName = packageInfo.packageName;
-                }
+                tmpInfo.packageName = packageInfo.packageName;
                 tmpInfo.versionName = packageInfo.versionName;
                 tmpInfo.versionCode = packageInfo.versionCode;
                 tmpInfo.appIcon = ImgUtil.drawableToDataUri(packageInfo.applicationInfo.loadIcon(getPackageManager()));
                 try {
-                    outputStream.write(JSON.toJSONString(tmpInfo).getBytes());
+                    byte[] dataBytes = JSON.toJSONString(tmpInfo).getBytes();
+                    // 数据长度转成二进制，存入byte[32]
+                    byte[] lengthBytes = new byte[32];
+                    String binStr = Integer.toBinaryString(dataBytes.length);
+                    String[] binArray = binStr.split("");
+                    for (int x = binArray.length-1, y = lengthBytes.length-1; x >= 0; x--, y--) {
+                        lengthBytes[y] = Byte.parseByte(binArray[x]);
+                    }
+                    // 先发送长度
+                    outputStream.write(lengthBytes);
+                    outputStream.flush();
+
+                    // 再发送数据
+                    outputStream.write(dataBytes);
                     outputStream.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
