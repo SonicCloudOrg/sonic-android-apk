@@ -31,7 +31,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
-
 import org.cloud.sonic.android.recorder.utils.Logger;
 import org.cloud.sonic.android.util.ADTSUtil;
 
@@ -42,8 +41,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
- * @author Eason, sndcpy
- * More https://github.com/rom1v/sndcpy
+ * @author Eason, Jeffrey.Wang
  */
 public class AudioService extends Service {
 
