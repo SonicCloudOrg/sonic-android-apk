@@ -31,9 +31,9 @@ public class AppListActivity extends Activity {
     private LocalServerSocket serverSocket;
 
     /**
-     * 数据缓冲大小
+     * 数据缓冲大小，因为无法关闭Nagle，所以该参数没有意义
      */
-    private static final int BUFFER_SIZE = 500000;
+    private static final int BUFFER_SIZE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
