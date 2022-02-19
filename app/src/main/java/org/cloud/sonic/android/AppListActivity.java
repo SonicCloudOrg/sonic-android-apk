@@ -92,10 +92,14 @@ public class AppListActivity extends Activity {
                     byte[] dataBytes = JSON.toJSONString(tmpInfo).getBytes();
                     // 数据长度转成二进制，存入byte[32]
                     byte[] lengthBytes = new byte[32];
-                    String binStr = Integer.toBinaryString(dataBytes.length);
-                    String[] binArray = binStr.split("");
+                    String binStr = Integer.toBinaryString(dataBytes.length).trim();
+                    char[] binArray = binStr.toCharArray();
                     for (int x = binArray.length-1, y = lengthBytes.length-1; x >= 0; x--, y--) {
-                        lengthBytes[y] = Byte.parseByte(binArray[x]);
+                        try {
+                            lengthBytes[y] = Byte.parseByte(binArray[x]+"");
+                        } catch (Exception e) {
+                            Log.e(TAG, String.format("char转byte失败，char为：【%s】", binArray[x] + ""));
+                        }
                     }
                     // 先发送长度
                     outputStream.write(lengthBytes);
