@@ -28,8 +28,10 @@ public class AppListActivity extends Activity {
     private static final String SOCKET = "sonicapplistservice";
     private LocalServerSocket serverSocket;
 
-    /** 数据缓冲大小 */
-    private static final int BUFFER_SIZE = 500000;
+    /**
+     * 数据缓冲大小，因为无法关闭Nagle，所以该参数没有意义
+     */
+    private static final int BUFFER_SIZE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +89,24 @@ public class AppListActivity extends Activity {
                 tmpInfo.versionCode = packageInfo.versionCode;
                 tmpInfo.appIcon = ImgUtil.drawableToDataUri(packageInfo.applicationInfo.loadIcon(getPackageManager()));
                 try {
-                    outputStream.write(JSON.toJSONString(tmpInfo).getBytes());
+                    byte[] dataBytes = JSON.toJSONString(tmpInfo).getBytes();
+                    // 数据长度转成二进制，存入byte[32]
+                    byte[] lengthBytes = new byte[32];
+                    String binStr = Integer.toBinaryString(dataBytes.length).trim();
+                    char[] binArray = binStr.toCharArray();
+                    for (int x = binArray.length-1, y = lengthBytes.length-1; x >= 0; x--, y--) {
+                        try {
+                            lengthBytes[y] = Byte.parseByte(binArray[x]+"");
+                        } catch (Exception e) {
+                            Log.e(TAG, String.format("char转byte失败，char为：【%s】", binArray[x] + ""));
+                        }
+                    }
+                    // 先发送长度
+                    outputStream.write(lengthBytes);
+                    outputStream.flush();
+
+                    // 再发送数据
+                    outputStream.write(dataBytes);
                     outputStream.flush();
                 } catch (IOException e) {
                     e.printStackTrace();

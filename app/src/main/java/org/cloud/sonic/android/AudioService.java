@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
@@ -72,14 +73,34 @@ public class AudioService extends Service {
     private OutputStream outputStream;
     private InputStream mInputStream;
 
+    //超时时间 30s
+    static final int LINK_SOCKET_TIMEOUT = 30*1000;
+    //定义在ActivityManagerService中，Service超时消息的what值
+    static final int LINK_SOCKET_TIMEOUT_MSG = 0;
+    static final int REC_SERVICE_ACTION = 1;
+
     private int mBufferSize = 4 * 1024;
 
     private final Handler mHandler = new Handler() {
+        @Override
         public void handleMessage(android.os.Message msg) {
-            String dispMesg = (String) msg.obj;
-            if (ACTION_STOP.equals(dispMesg)) {
-                stopSelf();
+            switch (msg.what){
+                case LINK_SOCKET_TIMEOUT_MSG:{
+                    stopSelf();
+                    break;
+                }
+                case REC_SERVICE_ACTION:{
+                    String recMes = (String) msg.obj;
+                    if (ACTION_STOP.equals(recMes)) {
+                        stopSelf();
+                    }
+                    break;
+                }
+                default:{
+                    Log.e("AudioService","why are you here?");
+                }
             }
+
         }
     };
 
@@ -126,7 +147,17 @@ public class AudioService extends Service {
             Log.w(TAG, "Failed to capture audio");
             stopSelf();
         }
+        linkTimeOutStop();
         return START_NOT_STICKY;
+    }
+
+    private void linkTimeOutStop() {
+        Message msg = mHandler.obtainMessage(
+            LINK_SOCKET_TIMEOUT_MSG);
+        msg.obj = "LINK_SOCKET_TIMEOUT";
+        //当超时后仍没有remove该SERVICE_TIMEOUT_MSG消息，则执行service Timeout流程【见2.3.1】
+        mHandler.sendMessageDelayed(msg, LINK_SOCKET_TIMEOUT);
+        //在这里，把加入的延时消息给移除掉了
     }
 
     @Override
@@ -204,6 +235,8 @@ public class AudioService extends Service {
                     clientSocket = serverSocket.accept();
                     Log.d(TAG, "client connected");
                     outputStream = clientSocket.getOutputStream();
+                    //将之前埋的 30 秒炸弹关闭
+                    mHandler.removeMessages(LINK_SOCKET_TIMEOUT_MSG);
                 }catch (IOException e){
                     e.printStackTrace();
 
@@ -259,6 +292,7 @@ public class AudioService extends Service {
                             try {
                                 outputStream.write(oneADTSFrameBytes,0,oneADTSFrameBytes.length);
                             } catch (IOException e) {
+                                stopSelf();
                                 e.printStackTrace();
                             }
                         }
@@ -296,20 +330,7 @@ public class AudioService extends Service {
         mAudioRecord.release();
         mMediaCodec.stop();
         mMediaCodec.release();
-        try {
-            if(serverSocket!=null){
-                serverSocket.close();
-                serverSocket = null;
-            }
-            if (clientSocket!=null){
-                clientSocket.getOutputStream().close();
-                clientSocket.close();
-                clientSocket = null;
-            }
-            outputStream = null;
-        }catch (IOException e){
-            e.printStackTrace();
-        }
+        disSocketService();
         stopForeground(true);
     }
 
@@ -328,7 +349,7 @@ public class AudioService extends Service {
                     int count = mInputStream.read(buffer);
                     String key = new String(Arrays.copyOfRange(buffer, 0, count));
                     Log.d(TAG, "ServerActivity mSocketOutStream==" + key);
-                    Message msg = mHandler.obtainMessage();
+                    Message msg = mHandler.obtainMessage(REC_SERVICE_ACTION);
                     msg.obj = key;
                     msg.sendToTarget();
                 } catch (IOException e) {
@@ -336,6 +357,23 @@ public class AudioService extends Service {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    private void disSocketService(){
+        try {
+            if(serverSocket!=null){
+                serverSocket.close();
+                serverSocket = null;
+            }
+            if (clientSocket!=null){
+                clientSocket.getOutputStream().close();
+                clientSocket.close();
+                clientSocket = null;
+            }
+            outputStream = null;
+        }catch (IOException e){
+            e.printStackTrace();
         }
     }
 
