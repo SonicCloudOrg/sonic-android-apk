@@ -291,6 +291,7 @@ public class AudioService extends Service {
                         if (outputStream!=null){
                             try {
                                 outputStream.write(oneADTSFrameBytes,0,oneADTSFrameBytes.length);
+                                outputStream.flush();
                             } catch (IOException e) {
                                 stopSelf();
                                 e.printStackTrace();
