@@ -3,6 +3,10 @@
 </p>
 <p align="center">🎉Android Plugin of Sonic cloud real machine testing platform.</p>
 
+ <a href="#">  
+    <img src="https://img.shields.io/github/downloads/SonicCloudOrg/sonic-android-apk/total">
+  </a>
+
 ## 背景与灵感
 > 当前sonic-android-apk仓库灵感来源于[STFService.apk](https://github.com/DeviceFarmer/STFService.apk)，对其部分代码进行扩展和去除不需要的模块。
 >
