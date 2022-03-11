@@ -16,7 +16,7 @@ public class ImgUtil {
 
     public static String bitmapToDataUri(Bitmap bitmap) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 40, out);
+        bitmap.compress(Bitmap.CompressFormat.PNG, 10, out);
         String base64 = Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
         return base64;
     }
