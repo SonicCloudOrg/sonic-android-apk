@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   package="org.cloud.sonic.android">
 
-  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
   <uses-permission
     android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
@@ -30,56 +28,51 @@
   <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
-  <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
-
   <queries>
     <intent>
       <action android:name="android.intent.action.VIEW" />
-
       <data android:scheme="http" />
     </intent>
   </queries>
 
   <application
+    android:theme="@style/AppTheme"
     android:allowBackup="true"
     android:icon="@drawable/ic_launcher"
     android:label="@string/app_name"
-    android:persistent="true"
-    android:theme="@style/AppTheme">
-    <activity
-      android:name=".wifi.SonicJoinWifiActivity"
-      android:exported="true" />
+    android:persistent="true">
 
     <meta-data
       android:name="android.max_aspect"
       android:value="3.0" />
 
     <activity
-      android:name=".AppListActivity"
+      android:name="org.cloud.sonic.android.AppListActivity"
       android:exported="true" />
+
     <activity
-      android:name=".MainActivity"
+      android:name="org.cloud.sonic.android.MainActivity"
       android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
-
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+
     <activity
-      android:name=".AudioActivity"
+      android:name="org.cloud.sonic.android.AudioActivity"
       android:exported="true"
       android:showWhenLocked="true"
-      android:turnScreenOn="true" />
+      android:turnScreenOn="true"></activity>
 
     <service
-      android:name=".AudioService"
+      android:name="org.cloud.sonic.android.AudioService"
       android:enabled="true"
       android:exported="false"
-      android:foregroundServiceType="mediaProjection" />
+      android:foregroundServiceType="mediaProjection"></service>
 
     <activity
-      android:name=".SearchActivity"
+      android:name="org.cloud.sonic.android.SearchActivity"
       android:excludeFromRecents="true"
       android:exported="true"
       android:finishOnTaskLaunch="true"
@@ -87,7 +80,6 @@
       android:stateNotNeeded="true">
       <intent-filter>
         <action android:name="org.cloud.sonic.android.ACTION_IDENTIFY" />
-
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </activity>
