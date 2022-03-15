@@ -41,36 +41,6 @@ public class SonicJoinWifiActivity extends AppCompatActivity {
     String mDns1;
     String mDns2;
 
-    Thread mThread;
-
-    private void printUsage()
-    {
-        Log.d(TAG, "No datastring provided. use the following adb command:");
-        Log.d(TAG,
-            "adb shell am start" +
-                " -n com.steinwurf.adbjoinwifi/.MainActivity " +
-                "-esn [connect|remove|clear_device_admin] " +
-                "-e ssid SSID " +
-                "-e password_type [WEP|WPA|PEAP] " +
-                "[-e username USERNAME] " +
-                "-e password PASSWORD " +
-                "\nOptional proxy args:\n" +
-                "    -e proxy_host HOSTNAME " +
-                "-e proxy_port PORT " +
-                "[-e proxy_bypass COMMA,SEPARATED,LIST]\n" +
-                "    OR\n" +
-                "    -e proxy_pac_uri http://my.proxy.config/url" +
-                "\nOptional static adddress args:\n" +
-                "    -e ip IP " +
-                "-e gateway GATEWAY " +
-                "-ei prefix PREFIX " +
-                "-e dns1 DNS1 " +
-                "-e dns2 DNS2");
-        Toast.makeText(this, "This application is meant to be used with ADB",
-            Toast.LENGTH_SHORT).show();
-        finish();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,11 +63,6 @@ public class SonicJoinWifiActivity extends AppCompatActivity {
         mPassword = getIntent().getStringExtra(PASSWORD);
         mUsername = getIntent().getStringExtra(USERNAME);
 
-//        String proxyHost = getIntent().getStringExtra(PROXY_HOST);
-//        String proxyPort = getIntent().getStringExtra(PROXY_PORT);
-//        String proxyBypass = getIntent().getStringExtra(PROXY_BYPASS);
-//        String proxyPacUri = getIntent().getStringExtra(PROXY_PAC_URI);
-
         mIP = getIntent().getStringExtra(IP);
         mGateway = getIntent().getStringExtra(GATEWAY);
         mPrefix = getIntent().getIntExtra(PREFIX, 24);
@@ -118,7 +83,6 @@ public class SonicJoinWifiActivity extends AppCompatActivity {
         TextView SSIDtextview = new TextView(this);
         SSIDtextview.setText(mSSID);
         layout.addView(SSIDtextview, params);
-
 
         SonicWifiManager.withContext(this)
             .connectWith(mSSID, mPassword)
@@ -144,6 +108,7 @@ public class SonicJoinWifiActivity extends AppCompatActivity {
                                 );
                                 Toast.makeText(SonicJoinWifiActivity.this, "SUCCESS!", Toast.LENGTH_SHORT).show();
                             }
+                            finish();
                             break;
                         case PackageManager.PERMISSION_DENIED:
                         default:

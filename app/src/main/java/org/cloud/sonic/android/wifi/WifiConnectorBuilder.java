@@ -1,5 +1,6 @@
 package org.cloud.sonic.android.wifi;
 
+import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -59,6 +60,8 @@ public interface WifiConnectorBuilder {
 
         boolean isWifiConnected(@NonNull String ssid);
         boolean isWifiConnected();
+
+        WifiInfo getWifiInfo();
     }
 
     interface WifiSuccessListener {

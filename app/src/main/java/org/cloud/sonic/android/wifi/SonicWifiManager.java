@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -454,5 +455,14 @@ public class SonicWifiManager implements WifiConnectorBuilder,
             unregisterReceiver(mContext, mWifiConnectionReceiver);
         }
         wifiLog("WiFi Disabled");
+    }
+
+    @Override
+    public WifiInfo getWifiInfo(){
+        try {
+            return mWifiManager.getConnectionInfo();
+        }catch (Exception e){
+            return null;
+        }
     }
 }
