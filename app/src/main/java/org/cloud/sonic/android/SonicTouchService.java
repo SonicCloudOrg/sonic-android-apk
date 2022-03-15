@@ -56,7 +56,6 @@ public class SonicTouchService extends Thread {
     private static final String SOCKET = "sonictouchservice";
     private static final int DEFAULT_MAX_CONTACTS = 10;
     private static final int DEFAULT_MAX_PRESSURE = 0;
-    private static final int MAX_POINTERS = 2;
     private final int width;
     private final int height;
     private LocalServerSocket serverSocket;
@@ -256,46 +255,29 @@ public class SonicTouchService extends Thread {
         this.handler = handler;
         inputManager = new InputManagerWrapper();
         windowManager = new WindowManagerWrapper();
-        initPointers();
+        MotionEvent.PointerProperties pointerProps0 = new MotionEvent.PointerProperties();
+        pointerProps0.id = 0;
+        pointerProps0.toolType = MotionEvent.TOOL_TYPE_FINGER;
+        MotionEvent.PointerProperties pointerProps1 = new MotionEvent.PointerProperties();
+        pointerProps1.id = 1;
+        pointerProps1.toolType = MotionEvent.TOOL_TYPE_FINGER;
+        pointerProperties[0] = pointerProps0;
+        pointerProperties[1] = pointerProps1;
 
-//        MotionEvent.PointerProperties pointerProps0 = new MotionEvent.PointerProperties();
-//        pointerProps0.id = 0;
-//        pointerProps0.toolType = MotionEvent.TOOL_TYPE_FINGER;
-//        MotionEvent.PointerProperties pointerProps1 = new MotionEvent.PointerProperties();
-//        pointerProps1.id = 1;
-//        pointerProps1.toolType = MotionEvent.TOOL_TYPE_FINGER;
-//        pointerProperties[0] = pointerProps0;
-//        pointerProperties[1] = pointerProps1;
-
-//        MotionEvent.PointerCoords pointerCoords0 = new MotionEvent.PointerCoords();
-//        MotionEvent.PointerCoords pointerCoords1 = new MotionEvent.PointerCoords();
-//        pointerCoords0.orientation = 0;
-//        pointerCoords0.pressure = 1;
-//        pointerCoords0.size = 1;
-//        pointerCoords1.orientation = 0;
-//        pointerCoords1.pressure = 1;
-//        pointerCoords1.size = 1;
-//        pointerCoords[0] = pointerCoords0;
-//        pointerCoords[1] = pointerCoords1;
+        MotionEvent.PointerCoords pointerCoords0 = new MotionEvent.PointerCoords();
+        MotionEvent.PointerCoords pointerCoords1 = new MotionEvent.PointerCoords();
+        pointerCoords0.orientation = 0;
+        pointerCoords0.pressure = 1;
+        pointerCoords0.size = 1;
+        pointerCoords1.orientation = 0;
+        pointerCoords1.pressure = 1;
+        pointerCoords1.size = 1;
+        pointerCoords[0] = pointerCoords0;
+        pointerCoords[1] = pointerCoords1;
 
         events[0] = new PointerEvent();
         events[1] = new PointerEvent();
     }
-
-    public void initPointers(){
-        for (int i=0; i < MAX_POINTERS; i++){
-            MotionEvent.PointerProperties props = new MotionEvent.PointerProperties();
-            props.toolType = MotionEvent.TOOL_TYPE_FINGER;
-
-            MotionEvent.PointerCoords coords = new MotionEvent.PointerCoords();
-            coords.orientation = 0;
-            coords.size = 0;
-
-            pointerProperties[i] = props;
-            pointerCoords[i] = coords;
-        }
-    }
-
 
     @Override
     public void run() {
