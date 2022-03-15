@@ -241,6 +241,7 @@ public class SonicTouchService extends Thread {
                             break;
                         case "r":
                             hasStop = true;
+                            break;
                         default:
                             System.out.println("could not parse: " + cmd);
                     }
@@ -298,5 +299,6 @@ public class SonicTouchService extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.exit(0);
     }
 }
