@@ -186,6 +186,7 @@ public class SonicTouchService extends Thread {
                 processCommandLoop(clientSocket);
             } catch (IOException e) {
                 e.printStackTrace();
+                break;
             }
         }
     }
