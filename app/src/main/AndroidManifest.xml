@@ -58,6 +58,10 @@
     <activity
       android:name=".AppListActivity"
       android:exported="true" />
+
+    <activity
+      android:name=".WifiListActivity"
+      android:exported="true" />
     <activity
       android:name=".MainActivity"
       android:exported="true">
