@@ -67,6 +67,7 @@ public class SonicTouchService extends Thread {
     private final InputManagerWrapper inputManager;
     private final WindowManagerWrapper windowManager;
     private final Handler handler;
+    private boolean hasStop = false;
 
     private class PointerEvent {
         long lastMouseDown;
@@ -176,7 +177,7 @@ public class SonicTouchService extends Thread {
     }
 
     private void manageClientConnection() {
-        while (true) {
+        while (!hasStop) {
             Log.i(TAG, String.format("Listening on %s", SOCKET));
             LocalSocket clientSocket;
             try {
@@ -238,6 +239,8 @@ public class SonicTouchService extends Thread {
                             int delayMs = scanner.nextInt();
                             Thread.sleep(delayMs);
                             break;
+                        case "r":
+                            hasStop = true;
                         default:
                             System.out.println("could not parse: " + cmd);
                     }
