@@ -76,7 +76,7 @@ public class WifiListActivity extends Activity {
             clientSocket.setSendBufferSize(BUFFER_SIZE);
             Log.d(TAG, "client connected");
             OutputStream outputStream = clientSocket.getOutputStream();
-            WifiListActivity.this.runOnUiThread(() -> getAllWifi(outputStream));
+            getAllWifi(outputStream)
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -84,49 +84,39 @@ public class WifiListActivity extends Activity {
 
     @SuppressLint("WrongConstant")
     public void getAllWifi(OutputStream outputStream) {
-        SonicWifiManager.withContext(this)
-            .scanWifi(new ScanResultsListener() {
-                @Override
-                public void onScanResults(@NonNull List<ScanResult> scanResults) {
 
-                    new Thread(() -> {
-                        WifiPacket wifiPacket = new WifiPacket();
-                        wifiPacket.setConnectWifi(SonicWifiManager.withContext(WifiListActivity.this)
-                            .isWifiConnected());
-                        WifiInfo wifiInfo = SonicWifiManager.withContext(WifiListActivity.this)
-                            .getWifiInfo();
-                        wifiPacket.setConnectedWifi(SonicWifiInfo.transform(wifiInfo));
-                        List<SonicWifiInfo> infos = new ArrayList<>();
-                        for (ScanResult scresult : scanResults) {
-                            infos.add(SonicWifiInfo.transform(scresult));
-                        }
-                        wifiPacket.setWifiResults(infos);
-                        try {
-                            byte[] dataBytes = JSON.toJSONString(wifiPacket).getBytes();
-                            // 数据长度转成二进制，存入byte[32]
-                            byte[] lengthBytes = new byte[32];
-                            String binStr = Integer.toBinaryString(dataBytes.length).trim();
-                            char[] binArray = binStr.toCharArray();
-                            for (int x = binArray.length - 1, y = lengthBytes.length - 1; x >= 0; x--, y--) {
-                                try {
-                                    lengthBytes[y] = Byte.parseByte(binArray[x] + "");
-                                } catch (Exception e) {
-                                    Log.e(TAG, String.format("char转byte失败，char为：【%s】", binArray[x] + ""));
-                                }
-                            }
-                            // 先发送长度
-                            outputStream.write(lengthBytes);
-                            outputStream.flush();
+        WifiPacket wifiPacket = new WifiPacket();
+        wifiPacket.setConnectWifi(SonicWifiManager.withContext(WifiListActivity.this)
+            .isWifiConnected());
+        WifiInfo wifiInfo = SonicWifiManager.withContext(WifiListActivity.this)
+            .getWifiInfo();
+        wifiPacket.setConnectedWifi(SonicWifiInfo.transform(wifiInfo));
+        List<SonicWifiInfo> infos = new ArrayList<>();
 
-                            // 再发送数据
-                            outputStream.write(dataBytes);
-                            outputStream.flush();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }).start();
+        wifiPacket.setWifiResults(infos);
+        try {
+            byte[] dataBytes = JSON.toJSONString(wifiPacket).getBytes();
+            // 数据长度转成二进制，存入byte[32]
+            byte[] lengthBytes = new byte[32];
+            String binStr = Integer.toBinaryString(dataBytes.length).trim();
+            char[] binArray = binStr.toCharArray();
+            for (int x = binArray.length - 1, y = lengthBytes.length - 1; x >= 0; x--, y--) {
+                try {
+                    lengthBytes[y] = Byte.parseByte(binArray[x] + "");
+                } catch (Exception e) {
+                    Log.e(TAG, String.format("char转byte失败，char为：【%s】", binArray[x] + ""));
                 }
-            }).start();
+            }
+            // 先发送长度
+            outputStream.write(lengthBytes);
+            outputStream.flush();
+
+            // 再发送数据
+            outputStream.write(dataBytes);
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
