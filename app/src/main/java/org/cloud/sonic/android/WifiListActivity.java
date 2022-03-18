@@ -27,7 +27,7 @@ import java.util.List;
 
 /**
  * @author Eason
- * get App list
+ * get WIFI list
  */
 public class WifiListActivity extends Activity {
     private static final String TAG = "sonicwifilistactivity";
