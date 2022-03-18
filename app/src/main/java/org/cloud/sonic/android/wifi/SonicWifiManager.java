@@ -29,7 +29,6 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
 
 import org.cloud.sonic.android.recorder.utils.Logger;
 import org.cloud.sonic.android.wifi.wifi_connect.ConnectionErrorCode;
