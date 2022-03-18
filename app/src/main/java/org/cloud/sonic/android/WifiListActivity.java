@@ -76,7 +76,7 @@ public class WifiListActivity extends Activity {
             clientSocket.setSendBufferSize(BUFFER_SIZE);
             Log.d(TAG, "client connected");
             OutputStream outputStream = clientSocket.getOutputStream();
-            getAllWifi(outputStream)
+            getAllWifi(outputStream);
         } catch (IOException e) {
             e.printStackTrace();
         }
