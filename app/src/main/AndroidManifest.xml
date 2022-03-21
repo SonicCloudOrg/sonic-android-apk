@@ -7,6 +7,7 @@
     android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
     tools:ignore="ProtectedPermissions" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.LOCAL_MAC_ADDRESS" />
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
   <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
@@ -50,6 +51,9 @@
       android:name="org.cloud.sonic.android.AppListActivity"
       android:exported="true" />
 
+    <activity
+      android:name=".WifiListActivity"
+      android:exported="true" />
     <activity
       android:name="org.cloud.sonic.android.MainActivity"
       android:exported="true">

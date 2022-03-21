@@ -1,11 +1,19 @@
 <resources>
-  <string name="app_name">Sonic助手</string>
-  <string name="version">版本号：v1.3.2.20</string>
-  <string name="welcome">欢迎使用Sonic助手</string>
-  <string name="service_ticker">Sonic Service running</string>
-  <string name="service_title">Sonic Service</string>
-  <string name="service_text">Sonic Service is running.</string>
-  <string name="notification_waiting">Sonic Service Waiting for connection…</string>
-  <string name="notification_forwarding">Audio Service forwarding enabled</string>
-  <string name="action_stop">Stop</string>
+    <string name="app_name">Sonic助手</string>
+    <string name="version">版本号：v1.3.4.10</string>
+    <string name="welcome">欢迎使用Sonic助手</string>
+    <string name="service_ticker">Sonic Service running</string>
+    <string name="service_title">Sonic Service</string>
+    <string name="service_text">Sonic Service is running.</string>
+    <string name="notification_waiting">Sonic Service Waiting for connection…</string>
+    <string name="notification_forwarding">Audio Service forwarding enabled</string>
+    <string name="action_stop">Stop</string>
+
+    <string name="device_admin">Sonic Device Admin</string>
+
+    <string name="trying_to_connect_to">Sonic Trying to connect to:</string>
+    <string name="trying_to_remove"> Sonic Trying to remove</string>
+    <string name="waiting">Sonic Waiting</string>
+    <string name="all">All</string>
+
 </resources>
