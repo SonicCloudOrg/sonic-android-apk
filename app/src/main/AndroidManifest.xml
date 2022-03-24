@@ -75,6 +75,15 @@
       android:exported="false"
       android:foregroundServiceType="mediaProjection"></service>
 
+    <service android:label="@string/ime_service_name"
+      android:name="org.cloud.sonic.android.ImeService"
+      android:permission="android.permission.BIND_INPUT_METHOD" android:enabled="true">
+      <intent-filter>
+        <action android:name="android.view.InputMethod"/>
+      </intent-filter>
+      <meta-data android:name="android.view.im" android:resource="@xml/method"/>
+    </service>
+
     <activity
       android:name="org.cloud.sonic.android.SearchActivity"
       android:excludeFromRecents="true"

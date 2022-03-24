@@ -15,5 +15,8 @@
     <string name="trying_to_remove"> Sonic Trying to remove</string>
     <string name="waiting">Sonic Waiting</string>
     <string name="all">All</string>
+    <string name="ime_service_name">Sonic input</string>
+    <string name="ime_service_title">Sonic</string>
+    <string name="ime_service_content">Sonic</string>
 
 </resources>
