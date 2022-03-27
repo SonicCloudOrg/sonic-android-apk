@@ -289,6 +289,7 @@ public class AudioService extends Service {
                         ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferIndex);
                         outputBuffer.get(oneADTSFrameBytes, 7, mBufferInfo.size);
                         if (outputStream!=null){
+                            //
                             try {
                                 outputStream.write(oneADTSFrameBytes,0,oneADTSFrameBytes.length);
                                 outputStream.flush();
