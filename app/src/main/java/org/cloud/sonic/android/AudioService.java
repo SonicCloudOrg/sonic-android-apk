@@ -26,7 +26,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
@@ -290,6 +289,22 @@ public class AudioService extends Service {
                         outputBuffer.get(oneADTSFrameBytes, 7, mBufferInfo.size);
                         if (outputStream!=null){
                             try {
+                                // 数据长度转成二进制，存入byte[32]
+                                byte[] lengthBytes = new byte[32];
+                                String binStr = Integer.toBinaryString(oneADTSFrameBytes.length).trim();
+                                char[] binArray = binStr.toCharArray();
+                                for (int x = binArray.length-1, y = lengthBytes.length-1; x >= 0; x--, y--) {
+                                    try {
+                                        lengthBytes[y] = Byte.parseByte(binArray[x]+"");
+                                    } catch (Exception e) {
+                                        Log.e(TAG, String.format("char转byte失败，char为：【%s】", binArray[x] + ""));
+                                    }
+                                }
+                                // 先发送长度
+                                outputStream.write(lengthBytes);
+                                outputStream.flush();
+
+                                // 后发送数据
                                 outputStream.write(oneADTSFrameBytes,0,oneADTSFrameBytes.length);
                                 outputStream.flush();
                             } catch (IOException e) {
