@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * More https://github.com/DeviceFarmer/STFService.apk
+ * @link{https://github.com/DeviceFarmer/STFService.apk}
  */
 public class InternalApi {
     public static boolean hasService(String name) {

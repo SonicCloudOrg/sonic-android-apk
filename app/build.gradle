@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
 }
+apply plugin: 'kotlin-android'
 
 android {
     compileSdk 31
@@ -64,4 +65,9 @@ dependencies {
     implementation("io.github.thanosfisherman.wifiutils:wifiutils:1.6.6")
 
     compileOnly fileTree(dir: '../shim/libs', include: ['*.jar'])
+  implementation "androidx.core:core-ktx:+"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+  mavenCentral()
 }
