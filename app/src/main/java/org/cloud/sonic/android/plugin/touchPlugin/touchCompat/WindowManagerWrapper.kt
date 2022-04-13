@@ -19,7 +19,7 @@ class WindowManagerWrapper {
     }
 
     init {
-        windowManager = WindowManagerWrapper.getWindowManager()
+        windowManager = getWindowManager()
     }
 
     fun getRotation(): Int {
