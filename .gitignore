@@ -7,3 +7,5 @@ build
 temp
 /.semaphore/
 /.github/
+/gradlew
+/gradlew.bat

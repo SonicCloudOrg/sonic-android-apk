@@ -1,12 +1,14 @@
 <resources>
-    <string name="app_name">Sonic助手</string>
-    <string name="version">版本号：v1.3.4.10</string>
-    <string name="welcome">欢迎使用Sonic助手</string>
+    <string name="app_name">Sonic</string>
+    <string name="version">v2.0.0.10</string>
+    <string name="welcome">Welcome to Sonic APK</string>
+    <string name="welcome_audio">Sonic Remote Audio working...</string>
     <string name="service_ticker">Sonic Service running</string>
     <string name="service_title">Sonic Service</string>
     <string name="service_text">Sonic Service is running.</string>
     <string name="notification_waiting">Sonic Service Waiting for connection…</string>
     <string name="notification_forwarding">Audio Service forwarding enabled</string>
+    <string name="manager_notification_forwarding">Manager Service forwarding enabled</string>
     <string name="action_stop">Stop</string>
 
     <string name="device_admin">Sonic Device Admin</string>
@@ -15,5 +17,4 @@
     <string name="trying_to_remove"> Sonic Trying to remove</string>
     <string name="waiting">Sonic Waiting</string>
     <string name="all">All</string>
-
 </resources>
