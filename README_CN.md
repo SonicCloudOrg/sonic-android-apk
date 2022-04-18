@@ -49,6 +49,9 @@
 gradlew assembleDebug
 ```
 
+## 感谢
+[Device Farmer](https://github.com/DeviceFarmer)
+
 ## 赞助商
 
 感谢所有赞助商！
