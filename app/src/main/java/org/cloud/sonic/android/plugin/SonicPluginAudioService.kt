@@ -107,7 +107,7 @@ class SonicPluginAudioService : Service() {
           }
         }
         else -> {
-          Log.e("AudioService", "why are you here?")
+          Log.e(TAG, "why are you here?")
         }
       }
     }
@@ -216,7 +216,7 @@ class SonicPluginAudioService : Service() {
       //必须要在子线程里接收消息
       Thread { this.acceptMsg() }.start()
     } else {
-      Log.w(TAG,"Failed to capture audio")
+      Log.w(TAG, "Failed to capture audio")
       stopSelf()
     }
     linkTimeOutStop()
@@ -273,7 +273,8 @@ class SonicPluginAudioService : Service() {
     workThread = object : Thread("publish-thread") {
       override fun run() {
         try {
-          Log.i(TAG,
+          Log.i(
+            TAG,
             String.format(
               "creating socket %s",
               CHANNEL_ID
@@ -281,14 +282,15 @@ class SonicPluginAudioService : Service() {
           )
           serverSocket =
             LocalServerSocket(CHANNEL_ID)
-          Log.i(TAG,
+          Log.i(
+            TAG,
             String.format(
               "Listening on %s",
               CHANNEL_ID
             )
           )
           clientSocket = serverSocket!!.accept()
-          Log.d(TAG,"client connected")
+          Log.d(TAG, "client connected")
           outputStream = clientSocket!!.outputStream
           handler.sendEmptyMessage(MSG_CONNECTION_ESTABLISHED)
           //将之前埋的 30 秒炸弹关闭
@@ -403,17 +405,19 @@ class SonicPluginAudioService : Service() {
           val buffer = ByteArray(1024)
           mInputStream = clientSocket!!.inputStream
           var count = mInputStream?.read(buffer) ?: 0
-          count = if (count < 0 ) 0 else count
+          count = if (count < 0) 0 else count
           val key = String(buffer.copyOfRange(0, count))
-          Log.d(TAG,
-            "ServerActivity mSocketOutStream==$key"
+          Log.d(
+            TAG,
+            "ServerActivity mSocketOutStream==" + key
           )
           val msg =
             mHandler.obtainMessage(REC_SERVICE_ACTION)
           msg.obj = key
           msg.sendToTarget()
         } catch (e: IOException) {
-          Log.d(TAG,
+          Log.d(
+            TAG,
             "exception==" + e.fillInStackTrace().message
           )
           e.printStackTrace()
