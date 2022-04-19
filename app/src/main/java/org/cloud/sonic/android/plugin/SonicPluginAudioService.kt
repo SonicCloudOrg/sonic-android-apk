@@ -290,7 +290,7 @@ class SonicPluginAudioService : Service() {
             )
           )
           clientSocket = serverSocket!!.accept()
-          Log.d(TAG, "client connected")
+          Log.i(TAG, "client connected")
           outputStream = clientSocket!!.outputStream
           handler.sendEmptyMessage(MSG_CONNECTION_ESTABLISHED)
           //将之前埋的 30 秒炸弹关闭
