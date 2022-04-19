@@ -291,6 +291,7 @@ class SonicPluginAudioService : Service() {
           clientSocket = serverSocket!!.accept()
           LogUtils.d("client connected")
           outputStream = clientSocket!!.outputStream
+          handler.sendEmptyMessage(MSG_CONNECTION_ESTABLISHED)
           //将之前埋的 30 秒炸弹关闭
           mHandler.removeMessages(LINK_SOCKET_TIMEOUT_MSG)
         } catch (e: IOException) {
@@ -402,8 +403,9 @@ class SonicPluginAudioService : Service() {
         try {
           val buffer = ByteArray(1024)
           mInputStream = clientSocket!!.inputStream
-          val count = mInputStream?.read(buffer) ?: 0
-          val key = String(Arrays.copyOfRange(buffer, 0, count))
+          var count = mInputStream?.read(buffer) ?: 0
+          count = if (count < 0 ) 0 else count
+          val key = String(buffer.copyOfRange(0, count))
           LogUtils.d(
             "ServerActivity mSocketOutStream==$key"
           )
