@@ -33,7 +33,6 @@ import android.util.Log
 import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import com.blankj.utilcode.util.LogUtils
 import org.cloud.sonic.android.R
 import org.cloud.sonic.android.utils.ADTSUtil
 import java.io.IOException
@@ -65,7 +64,7 @@ class SonicPluginAudioService : Service() {
   }
 
   private val CHANNEL_ID = "sonicaudioservice"
-
+  private val TAG = "SonicPluginAudioService"
   private val ACTION_STOP = "org.cloud.sonic.android.STOP"
 
 
@@ -217,7 +216,7 @@ class SonicPluginAudioService : Service() {
       //必须要在子线程里接收消息
       Thread { this.acceptMsg() }.start()
     } else {
-      LogUtils.w("Failed to capture audio")
+      Log.w(TAG,"Failed to capture audio")
       stopSelf()
     }
     linkTimeOutStop()
@@ -274,7 +273,7 @@ class SonicPluginAudioService : Service() {
     workThread = object : Thread("publish-thread") {
       override fun run() {
         try {
-          LogUtils.i(
+          Log.i(TAG,
             String.format(
               "creating socket %s",
               CHANNEL_ID
@@ -282,14 +281,14 @@ class SonicPluginAudioService : Service() {
           )
           serverSocket =
             LocalServerSocket(CHANNEL_ID)
-          LogUtils.i(
+          Log.i(TAG,
             String.format(
               "Listening on %s",
               CHANNEL_ID
             )
           )
           clientSocket = serverSocket!!.accept()
-          LogUtils.d("client connected")
+          Log.d(TAG,"client connected")
           outputStream = clientSocket!!.outputStream
           handler.sendEmptyMessage(MSG_CONNECTION_ESTABLISHED)
           //将之前埋的 30 秒炸弹关闭
@@ -346,7 +345,7 @@ class SonicPluginAudioService : Service() {
           @NonNull mBufferInfo: MediaCodec.BufferInfo
         ) {
           if (mBufferInfo.flags == MediaCodec.BUFFER_FLAG_CODEC_CONFIG) {
-            LogUtils.i("AudioService", "AAC的配置数据")
+            Log.i(TAG, "AAC Data")
           } else {
             val oneADTSFrameBytes = ByteArray(7 + mBufferInfo.size)
             ADTSUtil.addADTS(oneADTSFrameBytes)
@@ -406,7 +405,7 @@ class SonicPluginAudioService : Service() {
           var count = mInputStream?.read(buffer) ?: 0
           count = if (count < 0 ) 0 else count
           val key = String(buffer.copyOfRange(0, count))
-          LogUtils.d(
+          Log.d(TAG,
             "ServerActivity mSocketOutStream==$key"
           )
           val msg =
@@ -414,7 +413,7 @@ class SonicPluginAudioService : Service() {
           msg.obj = key
           msg.sendToTarget()
         } catch (e: IOException) {
-          LogUtils.d(
+          Log.d(TAG,
             "exception==" + e.fillInStackTrace().message
           )
           e.printStackTrace()

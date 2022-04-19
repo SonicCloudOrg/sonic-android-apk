@@ -32,14 +32,9 @@ import java.lang.reflect.InvocationTargetException
 
 class SearchActivity : Activity() {
 
-  private interface SecuredGetter<T> {
-    fun get(): T
-  }
-
   @SuppressLint("MissingPermission")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    val intent = intent
     val layout = LinearLayout(this)
     layout.keepScreenOn = true
     layout.orientation = LinearLayout.VERTICAL
@@ -52,19 +47,13 @@ class SearchActivity : Activity() {
     layout.setPadding(16, 16, 16, 16)
     layout.gravity = Gravity.CENTER
 
-    var serial = intent.getStringExtra("serial")
-
-    if (serial == null) {
-      serial = getProperty("ro.serialno", "unknown")
-    }
-
     layout.addView(createTitleLabel())
-    layout.addView(createLabel("SERIAL"))
-    layout.addView(createData(serial!!))
     layout.addView(createLabel("MODEL"))
     layout.addView(createData(getProperty("ro.product.model", "unknown")))
-    layout.addView(createLabel("VERSION"))
-    layout.addView(createData(Build.VERSION.RELEASE + " (SDK " + Build.VERSION.SDK_INT + ")"))
+    layout.addView(createLabel("MANUFACTURER"))
+    layout.addView(createData(getProperty("ro.product.manufacturer", "unknown")))
+    layout.addView(createLabel("SYSTEM VERSION"))
+    layout.addView(createData("ANDROID " + Build.VERSION.RELEASE))
     requestWindowFeature(Window.FEATURE_NO_TITLE)
     ensureVisibility()
     setContentView(layout)
@@ -74,8 +63,8 @@ class SearchActivity : Activity() {
   private fun createLabel(text: String): View? {
     val titleView = TextView(this)
     titleView.gravity = Gravity.CENTER
-    titleView.setTextColor(Color.parseColor("#000000"))
-    titleView.textSize = 16f
+    titleView.setTextColor(Color.parseColor("#606266"))
+    titleView.textSize = 18f
     titleView.text = text
     return titleView
   }
@@ -86,7 +75,7 @@ class SearchActivity : Activity() {
     titleView.setPadding(16, 16, 16, 40)
     titleView.setTextColor(Color.WHITE)
     titleView.textSize = 35f
-    titleView.text = "我在这里\nI am here!"
+    titleView.text = "I AM HERE"
     return titleView
   }
 
