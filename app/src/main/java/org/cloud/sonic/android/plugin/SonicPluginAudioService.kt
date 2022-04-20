@@ -304,7 +304,7 @@ class SonicPluginAudioService : Service() {
       }
     }
     workThread?.start()
-    mAudioRecord = mediaProjection?.let { createAudioRecord(it) }
+    mAudioRecord = createAudioRecord(mediaProjection!!)
     mAudioRecord?.startRecording()
     recordInternalAudio(mAudioRecord!!)
   }
@@ -396,6 +396,7 @@ class SonicPluginAudioService : Service() {
     mMediaCodec?.release()
     disSocketService()
     stopForeground(true)
+    Log.i(TAG,"socket closed.")
   }
 
   @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
