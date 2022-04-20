@@ -215,7 +215,7 @@ class SonicPluginAudioService : Service() {
       startRecording()
       //必须要在子线程里接收消息
       Thread { this.acceptMsg() }.start()
-      Log.i(TAG,"Accept Thread started.")
+      Log.i(TAG, "Accept Thread started.")
     } else {
       Log.w(TAG, "Failed to capture audio")
       stopSelf()
@@ -304,11 +304,9 @@ class SonicPluginAudioService : Service() {
       }
     }
     workThread?.start()
-    mediaProjection?.let {
-      mAudioRecord = createAudioRecord(it)
-      mAudioRecord?.startRecording()
-      recordInternalAudio(mAudioRecord!!)
-    }
+    mAudioRecord = mediaProjection?.let { createAudioRecord(it) }
+    mAudioRecord?.startRecording()
+    recordInternalAudio(mAudioRecord!!)
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
