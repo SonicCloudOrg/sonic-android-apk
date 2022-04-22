@@ -59,7 +59,7 @@ class SonicManagerService : Service() {
     private val NOTIFICATION_ID = 1
     private var serviceIsLive = false
 
-    private val SONIC_MANAGER_SOCKET = "sonic_manager_socket"
+    private val SONIC_MANAGER_SOCKET = "sonicmanagersocket"
     private lateinit var serverSocket: LocalServerSocket
     private lateinit var clientSocket: LocalSocket
 

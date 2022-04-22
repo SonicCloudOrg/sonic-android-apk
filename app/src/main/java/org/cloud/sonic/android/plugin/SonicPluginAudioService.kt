@@ -33,7 +33,6 @@ import android.util.Log
 import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import com.blankj.utilcode.util.LogUtils
 import org.cloud.sonic.android.R
 import org.cloud.sonic.android.utils.ADTSUtil
 import java.io.IOException
@@ -65,7 +64,7 @@ class SonicPluginAudioService : Service() {
   }
 
   private val CHANNEL_ID = "sonicaudioservice"
-
+  private val TAG = "SonicPluginAudioService"
   private val ACTION_STOP = "org.cloud.sonic.android.STOP"
 
 
@@ -108,7 +107,7 @@ class SonicPluginAudioService : Service() {
           }
         }
         else -> {
-          Log.e("AudioService", "why are you here?")
+          Log.e(TAG, "why are you here?")
         }
       }
     }
@@ -216,8 +215,9 @@ class SonicPluginAudioService : Service() {
       startRecording()
       //必须要在子线程里接收消息
       Thread { this.acceptMsg() }.start()
+      Log.i(TAG, "Accept Thread started.")
     } else {
-      LogUtils.w("Failed to capture audio")
+      Log.w(TAG, "Failed to capture audio")
       stopSelf()
     }
     linkTimeOutStop()
@@ -252,6 +252,7 @@ class SonicPluginAudioService : Service() {
     builder.setEncoding(AudioFormat.ENCODING_PCM_16BIT)
     builder.setSampleRate(SAMPLE_RATE)
     builder.setChannelMask(if (CHANNELS == 2) AudioFormat.CHANNEL_IN_STEREO else AudioFormat.CHANNEL_IN_MONO)
+    Log.i(TAG, "Audio format created.")
     return builder.build()
   }
 
@@ -265,6 +266,7 @@ class SonicPluginAudioService : Service() {
         mediaProjection
       )
     )
+    Log.i(TAG, "Audio record created.")
     return builder.build()
   }
 
@@ -274,7 +276,8 @@ class SonicPluginAudioService : Service() {
     workThread = object : Thread("publish-thread") {
       override fun run() {
         try {
-          LogUtils.i(
+          Log.i(
+            TAG,
             String.format(
               "creating socket %s",
               CHANNEL_ID
@@ -282,15 +285,17 @@ class SonicPluginAudioService : Service() {
           )
           serverSocket =
             LocalServerSocket(CHANNEL_ID)
-          LogUtils.i(
+          Log.i(
+            TAG,
             String.format(
               "Listening on %s",
               CHANNEL_ID
             )
           )
           clientSocket = serverSocket!!.accept()
-          LogUtils.d("client connected")
+          Log.i(TAG, "client connected")
           outputStream = clientSocket!!.outputStream
+          handler.sendEmptyMessage(MSG_CONNECTION_ESTABLISHED)
           //将之前埋的 30 秒炸弹关闭
           mHandler.removeMessages(LINK_SOCKET_TIMEOUT_MSG)
         } catch (e: IOException) {
@@ -299,11 +304,9 @@ class SonicPluginAudioService : Service() {
       }
     }
     workThread?.start()
-    mediaProjection?.let {
-      mAudioRecord = createAudioRecord(it)
-      mAudioRecord?.startRecording()
-      recordInternalAudio(mAudioRecord!!)
-    }
+    mAudioRecord = createAudioRecord(mediaProjection!!)
+    mAudioRecord?.startRecording()
+    recordInternalAudio(mAudioRecord!!)
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
@@ -345,7 +348,7 @@ class SonicPluginAudioService : Service() {
           @NonNull mBufferInfo: MediaCodec.BufferInfo
         ) {
           if (mBufferInfo.flags == MediaCodec.BUFFER_FLAG_CODEC_CONFIG) {
-            LogUtils.i("AudioService", "AAC的配置数据")
+            Log.i(TAG, "AAC Data")
           } else {
             val oneADTSFrameBytes = ByteArray(7 + mBufferInfo.size)
             ADTSUtil.addADTS(oneADTSFrameBytes)
@@ -393,6 +396,7 @@ class SonicPluginAudioService : Service() {
     mMediaCodec?.release()
     disSocketService()
     stopForeground(true)
+    Log.i(TAG,"socket closed.")
   }
 
   @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -402,17 +406,20 @@ class SonicPluginAudioService : Service() {
         try {
           val buffer = ByteArray(1024)
           mInputStream = clientSocket!!.inputStream
-          val count = mInputStream?.read(buffer) ?: 0
-          val key = String(Arrays.copyOfRange(buffer, 0, count))
-          LogUtils.d(
-            "ServerActivity mSocketOutStream==$key"
+          var count = mInputStream?.read(buffer) ?: 0
+          count = if (count < 0) 0 else count
+          val key = String(buffer.copyOfRange(0, count))
+          Log.d(
+            TAG,
+            "ServerActivity mSocketOutStream==" + key
           )
           val msg =
             mHandler.obtainMessage(REC_SERVICE_ACTION)
           msg.obj = key
           msg.sendToTarget()
         } catch (e: IOException) {
-          LogUtils.d(
+          Log.d(
+            TAG,
             "exception==" + e.fillInStackTrace().message
           )
           e.printStackTrace()

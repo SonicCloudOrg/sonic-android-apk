@@ -34,14 +34,15 @@ import org.cloud.sonic.android.plugin.touchPlugin.touchCompat.WindowManagerWrapp
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.io.OutputStreamWriter
 import java.lang.reflect.InvocationTargetException
 import java.util.*
 import kotlin.math.cos
 import kotlin.math.sin
 
-class SonicPluginTouchService(var width: Int = 0, var height: Int = 0, var handler: Handler?) :
+class SonicPluginTouchService(var width: Int = 0, var handler: Handler?) :
   Thread() {
+  private val TAG = "SonicPluginTouchService"
+
   companion object {
     @JvmStatic
     fun main(args: Array<String>) {
@@ -53,7 +54,6 @@ class SonicPluginTouchService(var width: Int = 0, var height: Int = 0, var handl
           val m: SonicPluginTouchService =
             SonicPluginTouchService(
               size.x,
-              size.y,
               handler
             )
           m.start()
@@ -206,64 +206,34 @@ class SonicPluginTouchService(var width: Int = 0, var height: Int = 0, var handl
     return combinedEvents
   }
 
-  private fun sendBanner(clientSocket: LocalSocket) {
-    try {
-      val out = OutputStreamWriter(clientSocket.outputStream)
-      out.write("v 1\n")
-      val resolution = String.format(
-        Locale.US, "^ %d %d %d %d%n",
-        DEFAULT_MAX_CONTACTS, width, height, DEFAULT_MAX_PRESSURE
-      )
-      out.write(resolution)
-      out.flush()
-    } catch (e: IOException) {
-      e.printStackTrace()
-    }
-  }
-
   private fun manageClientConnection() {
-    while (!hasStop) {
-      Log.i("SonicPluginTouchService", String.format("Listening on %s", SOCKET))
-      var clientSocket: LocalSocket?
-      try {
-        clientSocket = serverSocket!!.accept()
-        Log.i("SonicPluginTouchService", "client connected")
-        sendBanner(clientSocket)
-        processCommandLoop(clientSocket)
-      } catch (e: IOException) {
-        e.printStackTrace()
-        break
-      }
+    Log.i(TAG, String.format("Listening on %s", SOCKET))
+    var clientSocket: LocalSocket?
+    try {
+      clientSocket = serverSocket!!.accept()
+      Log.i(TAG, "client connected")
+      processCommandLoop(clientSocket)
+    } catch (e: IOException) {
+      Log.i(TAG, "error")
     }
   }
 
   @Throws(IOException::class)
   private fun processCommandLoop(clientSocket: LocalSocket) {
     BufferedReader(InputStreamReader(clientSocket.inputStream)).use { `in` ->
-      var cmd: String
+      var cmd: String?
       var count = 0
-      while (`in`.readLine().also { cmd = it } != null) {
+      do {
+        cmd = `in`.readLine()
+        if (cmd == null) {
+          break
+        }
         try {
           Scanner(cmd).use { scanner ->
             scanner.useDelimiter(" ")
             val type = scanner.next()
             val contact: Int
             when (type) {
-              "c" -> {
-                if (count == 1) {
-                  injectEvent(getMotionEvent(events[0]!!)!!)
-                } else if (count == 2) {
-                  for (event in getMotionEvent(
-                    events[0]!!,
-                    events[1]!!
-                  )!!) {
-                    injectEvent(event!!)
-                  }
-                } else {
-                  println("count not manage events #$count")
-                }
-                count = 0
-              }
               "u" -> {
                 count++
                 contact = scanner.nextInt()
@@ -275,7 +245,6 @@ class SonicPluginTouchService(var width: Int = 0, var height: Int = 0, var handl
                 contact = scanner.nextInt()
                 events[contact]!!.lastX = scanner.nextInt()
                 events[contact]!!.lastY = scanner.nextInt()
-                //scanner.nextInt(); //pressure is currently not supported
                 events[contact]!!.action =
                   if (contact == 0) MotionEvent.ACTION_DOWN else MotionEvent.ACTION_POINTER_2_DOWN
               }
@@ -284,23 +253,31 @@ class SonicPluginTouchService(var width: Int = 0, var height: Int = 0, var handl
                 contact = scanner.nextInt()
                 events[contact]!!.lastX = scanner.nextInt()
                 events[contact]!!.lastY = scanner.nextInt()
-                //scanner.nextInt(); //pressure is currently not supported
                 events[contact]!!.action = MotionEvent.ACTION_MOVE
-              }
-              "w" -> {
-                val delayMs = scanner.nextInt()
-                sleep(delayMs.toLong())
               }
               "r" -> hasStop = true
               else -> println("could not parse: $cmd")
             }
+            if (count == 1) {
+              injectEvent(getMotionEvent(events[0]!!)!!)
+            } else if (count == 2) {
+              for (event in getMotionEvent(
+                events[0]!!,
+                events[1]!!
+              )!!) {
+                injectEvent(event!!)
+              }
+            } else {
+              println("count not manage events #$count")
+            }
+            count = 0
           }
         } catch (e: NoSuchElementException) {
           println("could not parse: $cmd")
         } catch (e: InterruptedException) {
           e.printStackTrace()
         }
-      }
+      } while (!hasStop)
     }
   }
 
@@ -308,7 +285,7 @@ class SonicPluginTouchService(var width: Int = 0, var height: Int = 0, var handl
   override fun run() {
 
     try {
-      Log.i("SonicPluginTouchService", String.format("creating socket %s", SOCKET))
+      Log.i(TAG, String.format("creating socket %s", SOCKET))
       serverSocket = LocalServerSocket(SOCKET)
     } catch (e: IOException) {
       println(e.message)
@@ -317,12 +294,14 @@ class SonicPluginTouchService(var width: Int = 0, var height: Int = 0, var handl
     }
 
     manageClientConnection()
+
     try {
       serverSocket?.close()
     } catch (e: IOException) {
       println(e.message)
       e.printStackTrace()
     }
+    Log.i(TAG, "socket closed.")
     System.exit(0)
   }
 
