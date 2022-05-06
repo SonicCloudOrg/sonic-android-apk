@@ -356,6 +356,23 @@ class SonicPluginAudioService : Service() {
             outputBuffer!![oneADTSFrameBytes, 7, mBufferInfo.size]
             if (outputStream != null) {
               try {
+                val lengthBytes = ByteArray(32)
+                val binStr = Integer.toBinaryString(oneADTSFrameBytes.size).trim { it <= ' ' }
+                val binArray = binStr.toCharArray()
+                var x = binArray.size - 1
+                var y = lengthBytes.size - 1
+                while (x >= 0) {
+                  try {
+                    lengthBytes[y] = (binArray[x].toString() + "").toByte()
+                  } catch (e: Exception) {
+                    Log.i(TAG, String.format("char转byte失败，char为：【%s】", binArray[x].toString() + ""))
+                  }
+                  x--
+                  y--
+                }
+                outputStream!!.write(lengthBytes);
+                outputStream!!.flush();
+
                 outputStream!!.write(oneADTSFrameBytes, 0, oneADTSFrameBytes.size)
                 outputStream!!.flush()
               } catch (e: IOException) {
@@ -396,7 +413,7 @@ class SonicPluginAudioService : Service() {
     mMediaCodec?.release()
     disSocketService()
     stopForeground(true)
-    Log.i(TAG,"socket closed.")
+    Log.i(TAG, "socket closed.")
   }
 
   @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
