@@ -63,5 +63,5 @@ dependencies {
   //获取wifi需要
   implementation("io.github.thanosfisherman.wifiutils:wifiutils:1.6.6")
 
-  compileOnly fileTree(dir: 'libs', include: ['*.jar'])
+  compileOnly fileTree(dir: 'src/libs', include: ['*.jar'])
 }
