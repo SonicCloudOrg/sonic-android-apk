@@ -54,7 +54,7 @@ class SonicPluginAllAppListService(var handler: Handler?) : Thread() {
     createSystemContext.isAccessible = true
     val contextInstance: Context = createSystemContext.invoke(null, objectSystemMain) as Context
     return contextInstance.createPackageContext(
-      "org.cloud.sonic.android.app",
+      "org.cloud.sonic.android",
       Context.CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY
     )
   }
