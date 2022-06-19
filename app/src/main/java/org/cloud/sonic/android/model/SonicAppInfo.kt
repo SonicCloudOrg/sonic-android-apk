@@ -21,5 +21,5 @@ data class SonicAppInfo(
     val packageName:String,
     val versionName:String,
     val versionCode:Int,
-    val appIcon:ByteArray
+    val appIcon:String
 )
