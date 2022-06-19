@@ -22,6 +22,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.util.Base64
+import android.util.Log
 import com.blankj.utilcode.util.GsonUtils
 import com.blankj.utilcode.util.ImageUtils
 import com.blankj.utilcode.util.LogUtils
@@ -66,7 +67,12 @@ class SonicPluginAppList constructor(
             try {
               lengthBytes[y] = (binArray[x].toString() + "").toByte()
             } catch (e: Exception) {
-              LogUtils.e(String.format("char转byte失败，char为：【%s】", binArray[x].toString() + ""))
+              LogUtils.e(
+                String.format(
+                  "char transfer byte failed, char: %s",
+                  binArray[x].toString() + ""
+                )
+              )
             }
             x--
             y--

@@ -237,7 +237,7 @@ class SonicManagerService : Service() {
                 }
             }
             else -> {
-                Log.e("AudioService", "why are you here?")
+                Log.e("ManagerService", "why are you here?")
             }
         }
     }
