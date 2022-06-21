@@ -365,7 +365,7 @@ class SonicPluginAudioService : Service() {
                   try {
                     lengthBytes[y] = (binArray[x].toString() + "").toByte()
                   } catch (e: Exception) {
-                    Log.i(TAG, String.format("char转byte失败，char为：【%s】", binArray[x].toString() + ""))
+                    Log.i(TAG, String.format("char transfer byte failed, char: %s", binArray[x].toString() + ""))
                   }
                   x--
                   y--

@@ -3,6 +3,7 @@
   xmlns:tools="http://schemas.android.com/tools"
   package="org.cloud.sonic.android">
 
+  <uses-permission android:name="android.permission.RECORD_AUDIO"/>
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- 获取wifi需要 -->
   <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
   <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
