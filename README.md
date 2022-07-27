@@ -15,6 +15,7 @@
      <a href="#">
       <img src="https://img.shields.io/github/downloads/SonicCloudOrg/sonic-android-apk/total">
     </a>
+<a href="https://app.fossa.com/projects/git%2Bgithub.com%2FSonicCloudOrg%2Fsonic-android-apk?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FSonicCloudOrg%2Fsonic-android-apk.svg?type=shield"/></a>
 </p>
 
 ### Official Website
@@ -63,3 +64,6 @@ Thank you to all our sponsors!
 ## LICENSE
 
 [License](LICENSE)
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSonicCloudOrg%2Fsonic-android-apk.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FSonicCloudOrg%2Fsonic-android-apk?ref=badge_large)
