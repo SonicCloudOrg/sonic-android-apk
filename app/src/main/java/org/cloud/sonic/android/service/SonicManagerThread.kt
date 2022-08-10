@@ -53,17 +53,8 @@ class SonicManagerThread(var handler: Handler?) : Thread() {
 
   private fun getContext(): Context {
     val activityThread = Class.forName("android.app.ActivityThread")
-    val systemMain: Method = activityThread.getDeclaredMethod("systemMain")
-    val objectSystemMain: Any = systemMain.invoke(null)
-    val contextImpl = Class.forName("android.app.ContextImpl")
-    val createSystemContext: Method =
-      contextImpl.getDeclaredMethod("createSystemContext", activityThread)
-    createSystemContext.isAccessible = true
-    val contextInstance: Context = createSystemContext.invoke(null, objectSystemMain) as Context
-    return contextInstance.createPackageContext(
-      "org.cloud.sonic.android",
-      Context.CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY
-    )
+    val getSystemContextMethod: Method = activityThread.getDeclaredMethod("getSystemContext")
+    return getSystemContextMethod.invoke(activityThread) as Context
   }
 
   private val REC_SERVICE_ACTION = 1
