@@ -79,12 +79,7 @@ class SonicManagerService : Service() {
 
   var mHandler = object : Handler(Looper.getMainLooper()) {
     override fun handleMessage(msg: Message) {
-      LINK_SOCKET_TIMEOUT_MSG -> {
-        stopSelf()
-      }
-      else -> {
-        processOrder(msg)
-      }
+      processOrder(msg)
     }
   }
 
@@ -140,6 +135,7 @@ class SonicManagerService : Service() {
       closeSocket()
       stopSelf()
     }
+    linkTimeOutStop()
     return super.onStartCommand(intent, flags, startId)
   }
 
@@ -257,6 +253,9 @@ class SonicManagerService : Service() {
 
   private fun processOrder(msg: Message) {
     when (msg.what) {
+      LINK_SOCKET_TIMEOUT_MSG -> {
+        stopSelf()
+      }
       REC_SERVICE_ACTION -> {
         val recMes = msg.obj as String
         when (recMes) {
