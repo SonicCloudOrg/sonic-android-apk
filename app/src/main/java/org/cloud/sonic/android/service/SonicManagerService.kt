@@ -135,6 +135,7 @@ class SonicManagerService : Service() {
       closeSocket()
       stopSelf()
     }
+    linkTimeOutStop()
     return super.onStartCommand(intent, flags, startId)
   }
 
