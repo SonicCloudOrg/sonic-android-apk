@@ -141,16 +141,13 @@ class SonicManagerService : Service() {
 
   private fun disSocketService() {
     try {
-      serverSocket?.let {
+      serverSocket.let {
         it.close()
-        serverSocket = null
       }
-      clientSocket?.let {
+      clientSocket.let {
         it.outputStream.close()
         it.close()
-        clientSocket = null
       }
-      outputStream = null
     } catch (e: IOException) {
       e.printStackTrace()
     }
@@ -174,7 +171,6 @@ class SonicManagerService : Service() {
     serviceIsLive = false;
     // 移除通知
     stopForeground(true);
-    // 关闭服务
     disSocketService()
     super.onDestroy();
   }
