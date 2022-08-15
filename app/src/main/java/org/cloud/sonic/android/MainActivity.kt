@@ -38,8 +38,7 @@ class MainActivity : AppCompatActivity() {
       statusBarDarkFont(true)
     }
 
-    //关闭服务启动模式尝试使用Thread 的方式启动
-//    SonicManagerService.start(this)
+    SonicManagerService.start(this)
 
     Handler(Looper.getMainLooper()) {
       finish()
