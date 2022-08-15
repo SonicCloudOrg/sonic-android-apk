@@ -132,18 +132,26 @@ class SonicManagerService : Service() {
       outputStream = clientSocket.outputStream
       mHandler.removeMessages(LINK_SOCKET_TIMEOUT_MSG)
       acceptMsg()
-      closeSocket()
+      disSocketService()
       stopSelf()
     }
     linkTimeOutStop()
     return super.onStartCommand(intent, flags, startId)
   }
 
-  fun closeSocket() {
+  private fun disSocketService() {
     try {
-      serverSocket.close()
+      serverSocket?.let {
+        it.close()
+        serverSocket = null
+      }
+      clientSocket?.let {
+        it.outputStream.close()
+        it.close()
+        clientSocket = null
+      }
+      outputStream = null
     } catch (e: IOException) {
-      println(e.message)
       e.printStackTrace()
     }
   }
@@ -166,6 +174,8 @@ class SonicManagerService : Service() {
     serviceIsLive = false;
     // 移除通知
     stopForeground(true);
+    // 关闭服务
+    disSocketService()
     super.onDestroy();
   }
 
