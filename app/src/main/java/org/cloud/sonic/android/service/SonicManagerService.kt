@@ -72,11 +72,19 @@ class SonicManagerService : Service() {
   lateinit var appListPlugin: SonicPluginAppList
   lateinit var wifiManager: SonicPluginWifiManager
 
+  val LINK_SOCKET_TIMEOUT = 30 * 1000
+  val LINK_SOCKET_TIMEOUT_MSG = 0
+
   private val REC_SERVICE_ACTION = 1
 
   var mHandler = object : Handler(Looper.getMainLooper()) {
     override fun handleMessage(msg: Message) {
-      processOrder(msg)
+      LINK_SOCKET_TIMEOUT_MSG -> {
+        stopSelf()
+      }
+      else -> {
+        processOrder(msg)
+      }
     }
   }
 
@@ -127,6 +135,7 @@ class SonicManagerService : Service() {
       clientSocket = serverSocket.accept()
       LogUtils.d("client connected")
       outputStream = clientSocket.outputStream
+      mHandler.removeMessages(LINK_SOCKET_TIMEOUT_MSG)
       acceptMsg()
       closeSocket()
       stopSelf()
@@ -141,6 +150,17 @@ class SonicManagerService : Service() {
       println(e.message)
       e.printStackTrace()
     }
+  }
+
+  private fun linkTimeOutStop() {
+    val msg = mHandler.obtainMessage(
+      LINK_SOCKET_TIMEOUT_MSG
+    )
+    msg.obj = "LINK_SOCKET_TIMEOUT"
+    mHandler.sendMessageDelayed(
+      msg,
+      LINK_SOCKET_TIMEOUT.toLong()
+    )
   }
 
   override fun onDestroy() {
