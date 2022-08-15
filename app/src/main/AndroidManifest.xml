@@ -75,6 +75,11 @@
     </activity>
 
     <activity
+      android:name=".SoniceServiceActivity"
+      android:exported="true">
+    </activity>
+
+    <activity
       android:name=".plugin.activityPlugin.SearchActivity"
       android:excludeFromRecents="true"
       android:exported="true"

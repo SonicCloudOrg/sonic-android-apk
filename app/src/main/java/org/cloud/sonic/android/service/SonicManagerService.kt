@@ -141,9 +141,7 @@ class SonicManagerService : Service() {
 
   private fun disSocketService() {
     try {
-      serverSocket.let {
-        it.close()
-      }
+      serverSocket.close()
       clientSocket.let {
         it.outputStream.close()
         it.close()
