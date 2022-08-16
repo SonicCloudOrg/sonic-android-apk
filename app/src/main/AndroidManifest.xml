@@ -75,7 +75,7 @@
     </activity>
 
     <activity
-      android:name=".SoniceServiceActivity"
+      android:name=".SonicServiceActivity"
       android:exported="true">
     </activity>
 

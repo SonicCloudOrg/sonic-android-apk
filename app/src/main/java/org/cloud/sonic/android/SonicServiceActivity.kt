@@ -26,7 +26,7 @@ import com.gyf.immersionbar.ktx.immersionBar
 import org.cloud.sonic.android.databinding.ActivityMainBinding
 import org.cloud.sonic.android.service.SonicManagerService
 
-class SoniceServiceActivity : AppCompatActivity() {
+class SonicServiceActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     val binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)

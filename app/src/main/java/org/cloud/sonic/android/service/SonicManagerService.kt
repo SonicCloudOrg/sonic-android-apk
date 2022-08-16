@@ -145,6 +145,7 @@ class SonicManagerService : Service() {
       clientSocket.let {
         it.outputStream.close()
         it.close()
+        LogUtils.i("client closed.")
       }
     } catch (e: IOException) {
       e.printStackTrace()
