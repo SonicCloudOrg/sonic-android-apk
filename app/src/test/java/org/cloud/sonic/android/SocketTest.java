@@ -13,6 +13,8 @@ public class SocketTest {
         Runtime.getRuntime().exec("adb forward tcp:7890 localabstract:sonicmanagersocket");
         Socket socket = new Socket("localhost",7890);
         System.out.println(socket.isConnected());
+        socket.getOutputStream().write("org.cloud.sonic.android.STOP".getBytes());
+        socket.getOutputStream().flush();
         Thread.sleep(3000);
         socket.close();
         Runtime.getRuntime().exec("adb forward --remove tcp:7890");

@@ -35,15 +35,21 @@ import org.cloud.sonic.android.constants.Contants.ACTION_GET_ALL_WIFI_INFO
 import org.cloud.sonic.android.plugin.SonicPluginAppList
 import org.cloud.sonic.android.plugin.SonicPluginWifiManager
 import org.cloud.sonic.android.utils.appGlobalScope
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 import java.util.*
 
 //@AndroidEntryPoint
 class SonicManagerService : Service() {
 
   companion object {
+    private const val CHANNEL_ID = "sonic_manager_notification_channel_id_01"
+    private const val ACTION_STOP = "org.cloud.sonic.android.STOP"
+    private const val SONIC_MANAGER_SOCKET = "sonicmanagersocket"
+    private const val NOTIFICATION_ID = 1
+    private const val REC_SERVICE_ACTION = 1
+    private const val LINK_SOCKET_TIMEOUT = 30 * 1000
+    private const val LINK_SOCKET_TIMEOUT_MSG = 0
+
     fun start(context: Context) {
       val intent = Intent(context, SonicManagerService::class.java)
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -54,28 +60,20 @@ class SonicManagerService : Service() {
     }
   }
 
-  private val CHANNEL_ID = "sonic_manager_notification_channel_id_01"
-  private val ACTION_STOP = "org.cloud.sonic.android.STOP"
-  private val NOTIFICATION_ID = 1
   private var serviceIsLive = false
+  private var isSocketStop = false
 
-  private val SONIC_MANAGER_SOCKET = "sonicmanagersocket"
-  private lateinit var serverSocket: LocalServerSocket
-  private lateinit var clientSocket: LocalSocket
+  private var serverSocket: LocalServerSocket? = null
+  private var clientSocket: LocalSocket? = null
 
-  private lateinit var outputStream: OutputStream
-  private lateinit var inputStream: InputStream
+  private var outputStream: OutputStream? = null
+
   //hilt 依赖注解
-//    @Inject lateinit var appListPlugin:SonicPluginAppList
-//    @Inject lateinit var wifiManager:SonicPluginWifiManager
+  //@Inject lateinit var appListPlugin:SonicPluginAppList
+  //@Inject lateinit var wifiManager:SonicPluginWifiManager
 
   lateinit var appListPlugin: SonicPluginAppList
   lateinit var wifiManager: SonicPluginWifiManager
-
-  val LINK_SOCKET_TIMEOUT = 30 * 1000
-  val LINK_SOCKET_TIMEOUT_MSG = 0
-
-  private val REC_SERVICE_ACTION = 1
 
   var mHandler = object : Handler(Looper.getMainLooper()) {
     override fun handleMessage(msg: Message) {
@@ -108,6 +106,7 @@ class SonicManagerService : Service() {
     }
   }
 
+
   override fun onBind(p0: Intent?): IBinder? {
     LogUtils.i("OnBind")
     return null
@@ -117,6 +116,7 @@ class SonicManagerService : Service() {
     LogUtils.i("onStartCommand")
     val action = intent!!.action
     if (ACTION_STOP == action) {
+      closeSocket()
       //exit
       stopSelf()
       return START_NOT_STICKY
@@ -127,29 +127,14 @@ class SonicManagerService : Service() {
       LogUtils.i(String.format("creating socket %s", SONIC_MANAGER_SOCKET))
       serverSocket = LocalServerSocket(SONIC_MANAGER_SOCKET)
       LogUtils.i(String.format("Listening on %s", SONIC_MANAGER_SOCKET))
-      clientSocket = serverSocket.accept()
+      clientSocket = serverSocket?.accept()
       LogUtils.d("client connected")
-      outputStream = clientSocket.outputStream
-      mHandler.removeMessages(LINK_SOCKET_TIMEOUT_MSG)
+      outputStream = clientSocket?.outputStream
       acceptMsg()
-      disSocketService()
-      stopSelf()
     }
     linkTimeOutStop()
-    return super.onStartCommand(intent, flags, startId)
-  }
 
-  private fun disSocketService() {
-    try {
-      serverSocket.close()
-      clientSocket.let {
-        it.outputStream.close()
-        it.close()
-        LogUtils.i("client closed.")
-      }
-    } catch (e: IOException) {
-      e.printStackTrace()
-    }
+    return super.onStartCommand(intent, flags, startId)
   }
 
   private fun linkTimeOutStop() {
@@ -169,8 +154,8 @@ class SonicManagerService : Service() {
     // 标记服务关闭
     serviceIsLive = false;
     // 移除通知
-    stopForeground(true);
-    disSocketService()
+    stopForeground(true)
+    closeSocket()
     super.onDestroy();
   }
 
@@ -179,20 +164,20 @@ class SonicManagerService : Service() {
   }
 
   private fun acceptMsg() {
-    while (true) {
-      try {
-        val buffer = ByteArray(1024)
-        inputStream = clientSocket.inputStream
-        val count = inputStream.read(buffer)
-        val key = String(Arrays.copyOfRange(buffer, 0, count))
-        LogUtils.d("ServerActivity mSocketOutStream==$key")
-        val msg: Message = mHandler.obtainMessage(REC_SERVICE_ACTION)
-        msg.obj = key
-        msg.sendToTarget()
-      } catch (e: IOException) {
-        LogUtils.d("exception==" + e.fillInStackTrace().message)
-        e.printStackTrace()
+    isSocketStop = true
+    try {
+      BufferedReader(InputStreamReader(clientSocket?.inputStream)).use { read ->
+        val key = read.readLine()
+        key?.let {
+          do {
+            val msg: Message = mHandler.obtainMessage(REC_SERVICE_ACTION)
+            msg.obj = key
+            msg.sendToTarget()
+          } while (isSocketStop)
+        }
       }
+    } catch (e: InterruptedException) {
+      e.printStackTrace()
     }
   }
 
@@ -262,19 +247,26 @@ class SonicManagerService : Service() {
         stopSelf()
       }
       REC_SERVICE_ACTION -> {
-        val recMes = msg.obj as String
-        when (recMes) {
-          ACTION_STOP -> stopSelf()
+        when (msg.obj as String) {
+          ACTION_STOP -> {
+            closeSocket()
+            stopSelf()
+          }
           ACTION_GET_ALL_APP_INFO -> appListPlugin.getAllAppInfo(outputStream = outputStream)
           ACTION_GET_ALL_WIFI_INFO -> wifiManager.getAllWifiList(outputStream = outputStream)
+          else -> LogUtils.w("service action is ${msg.obj}")
         }
-        if (ACTION_STOP == recMes) {
-          stopSelf()
-        }
-      }
-      else -> {
-        Log.e("ManagerService", "why are you here?")
       }
     }
+  }
+
+  private fun closeSocket() {
+    isSocketStop = true
+    outputStream?.close()
+    serverSocket?.close()
+    clientSocket?.close()
+    outputStream = null
+    serverSocket = null
+    clientSocket = null
   }
 }

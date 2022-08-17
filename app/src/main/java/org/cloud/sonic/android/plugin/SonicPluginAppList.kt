@@ -34,7 +34,7 @@ class SonicPluginAppList constructor(
   private val context: Context
 ) : IPlugin {
 
-  fun getAllAppInfo(outputStream: OutputStream) {
+  fun getAllAppInfo(outputStream: OutputStream?) {
     val packages: List<PackageInfo> =
       context.packageManager.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES)
 
@@ -78,12 +78,12 @@ class SonicPluginAppList constructor(
             y--
           }
           // 先发送长度
-          outputStream.write(lengthBytes)
-          outputStream.flush()
+          outputStream?.write(lengthBytes)
+          outputStream?.flush()
 
           // 再发送数据
-          outputStream.write(dataBytes)
-          outputStream.flush()
+          outputStream?.write(dataBytes)
+          outputStream?.flush()
         } catch (e: IOException) {
           e.printStackTrace()
         }
