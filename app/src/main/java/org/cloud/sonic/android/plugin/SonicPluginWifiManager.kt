@@ -30,7 +30,7 @@ import java.io.OutputStream
 class SonicPluginWifiManager constructor(
     private val context: Context
 ) :IPlugin{
-    fun getAllWifiList(outputStream: OutputStream){
+    fun getAllWifiList(outputStream: OutputStream?){
         WifiUtils.withContext(context).scanWifi { results ->
             val mWifiManager =
                 context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -70,12 +70,12 @@ class SonicPluginWifiManager constructor(
                     y--
                 }
                 // 先发送长度
-                outputStream.write(lengthBytes)
-                outputStream.flush()
+                outputStream?.write(lengthBytes)
+                outputStream?.flush()
 
                 // 再发送数据
-                outputStream.write(dataBytes)
-                outputStream.flush()
+                outputStream?.write(dataBytes)
+                outputStream?.flush()
             } catch (e: IOException) {
                 e.printStackTrace()
             }
