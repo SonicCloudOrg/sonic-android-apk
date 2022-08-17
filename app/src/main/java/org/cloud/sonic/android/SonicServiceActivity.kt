@@ -26,7 +26,7 @@ import com.gyf.immersionbar.ktx.immersionBar
 import org.cloud.sonic.android.databinding.ActivityMainBinding
 import org.cloud.sonic.android.service.SonicManagerService
 
-class MainActivity : AppCompatActivity() {
+class SonicServiceActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     val binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -37,6 +37,8 @@ class MainActivity : AppCompatActivity() {
       navigationBarColor(R.color.white)
       statusBarDarkFont(true)
     }
+
+    SonicManagerService.start(this)
 
     Handler(Looper.getMainLooper()) {
       finish()
