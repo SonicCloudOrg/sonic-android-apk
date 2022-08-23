@@ -98,6 +98,10 @@
       android:exported="false" />
 
     <service
+      android:name=".service.SonicManagerServiceV2"
+      android:exported="true" />
+
+    <service
       android:name=".plugin.SonicPluginAudioService"
       android:enabled="true"
       android:exported="false"
