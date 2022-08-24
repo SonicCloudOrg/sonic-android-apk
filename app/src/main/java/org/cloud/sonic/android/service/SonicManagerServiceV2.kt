@@ -302,6 +302,5 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
 
     override fun onServerClosed(server: TcpServer, msg: String?, e: Exception) {
         LogUtils.d("服务器关闭 $server$msg$e")
-
     }
 }

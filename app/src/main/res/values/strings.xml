@@ -17,4 +17,6 @@
     <string name="trying_to_remove"> Sonic Trying to remove</string>
     <string name="waiting">Sonic Waiting</string>
     <string name="all">All</string>
+
+    <string name="keyboard_name">Sonic Keyboard</string>
 </resources>

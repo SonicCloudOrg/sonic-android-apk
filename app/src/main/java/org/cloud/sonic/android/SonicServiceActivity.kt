@@ -32,9 +32,10 @@ class SonicServiceActivity : AppCompatActivity() {
     setContentView(binding.root)
 
     immersionBar {
-      statusBarColor(R.color.white)
-      navigationBarColor(R.color.white)
+      statusBarColor(R.color.auto_bg)
+      navigationBarColor(R.color.auto_bg)
       statusBarDarkFont(true)
+      autoDarkModeEnable(true)
     }
 
     SonicManagerServiceV2.start(this)
