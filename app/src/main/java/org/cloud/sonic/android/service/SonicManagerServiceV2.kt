@@ -298,6 +298,7 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
         e: Exception?
     ) {
         LogUtils.d("客户端连接断开 ${tcpClient.getTargetInfo().ip}$msg$e")
+        closeSocket()
     }
 
     override fun onServerClosed(server: TcpServer, msg: String?, e: Exception) {
