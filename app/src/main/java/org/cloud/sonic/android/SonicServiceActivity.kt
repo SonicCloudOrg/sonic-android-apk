@@ -21,10 +21,9 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.AppUtils
-import com.blankj.utilcode.util.Utils
 import com.gyf.immersionbar.ktx.immersionBar
 import org.cloud.sonic.android.databinding.ActivityMainBinding
-import org.cloud.sonic.android.service.SonicManagerService
+import org.cloud.sonic.android.service.SonicManagerServiceV2
 
 class SonicServiceActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,12 +32,13 @@ class SonicServiceActivity : AppCompatActivity() {
     setContentView(binding.root)
 
     immersionBar {
-      statusBarColor(R.color.white)
-      navigationBarColor(R.color.white)
+      statusBarColor(R.color.auto_bg)
+      navigationBarColor(R.color.auto_bg)
       statusBarDarkFont(true)
+      autoDarkModeEnable(true)
     }
 
-    SonicManagerService.start(this)
+    SonicManagerServiceV2.start(this)
 
     Handler(Looper.getMainLooper()) {
       finish()

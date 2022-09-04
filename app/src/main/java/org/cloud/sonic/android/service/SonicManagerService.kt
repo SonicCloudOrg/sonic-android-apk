@@ -23,7 +23,6 @@ import android.graphics.drawable.Icon
 import android.net.LocalServerSocket
 import android.net.LocalSocket
 import android.os.*
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.blankj.utilcode.util.LogUtils
@@ -32,6 +31,9 @@ import kotlinx.coroutines.launch
 import org.cloud.sonic.android.R
 import org.cloud.sonic.android.constants.Contants.ACTION_GET_ALL_APP_INFO
 import org.cloud.sonic.android.constants.Contants.ACTION_GET_ALL_WIFI_INFO
+import org.cloud.sonic.android.lib.socketmanager.tcp.client.TcpClient
+import org.cloud.sonic.android.lib.socketmanager.tcp.client.listener.TcpClientListener
+import org.cloud.sonic.android.lib.socketmanager.tcp.model.TcpMassage
 import org.cloud.sonic.android.plugin.SonicPluginAppList
 import org.cloud.sonic.android.plugin.SonicPluginWifiManager
 import org.cloud.sonic.android.utils.appGlobalScope

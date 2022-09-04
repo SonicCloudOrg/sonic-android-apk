@@ -1,109 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  package="org.cloud.sonic.android">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="org.cloud.sonic.android">
 
-  <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- 获取wifi需要 -->
-  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-  <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-  <uses-permission
-    android:name="android.permission.LOCAL_MAC_ADDRESS"
-    tools:ignore="ProtectedPermissions" />
-  <uses-permission android:name="android.permission.RECORD_AUDIO" />
-  <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-  <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-  <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-  <uses-permission android:name="android.permission.WAKE_LOCK" />
-  <uses-permission android:name="android.permission.INTERNET" />
-  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-  <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-  <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
-  <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-  <uses-permission
-    android:name="android.permission.QUERY_ALL_PACKAGES"
-    tools:ignore="QueryAllPackagesPermission" />
-  <uses-permission
-    android:name="android.permission.DUMP"
-    tools:ignore="ProtectedPermissions" />
-  <uses-permission android:name="android.permission.BLUETOOTH" />
-  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- 获取wifi需要 -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission
+        android:name="android.permission.LOCAL_MAC_ADDRESS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission
+        android:name="android.permission.DUMP"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
-  <application
-    android:name=".App"
-    android:allowBackup="true"
-    android:foregroundServiceType="location"
-    android:icon="@mipmap/ic_launcher"
-    android:label="@string/app_name"
-    android:maxAspectRatio="2.4"
-    android:resizeableActivity="true"
-    android:roundIcon="@mipmap/ic_launcher_round"
-    android:supportsRtl="true"
-    android:theme="@style/Theme.Sonicandroidapk">
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:foregroundServiceType="location"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:maxAspectRatio="2.4"
+        android:resizeableActivity="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Sonicandroidapk">
 
-    <activity
-      android:name=".plugin.audioPlugin.AudioActivity"
-      android:exported="true"
-      android:showWhenLocked="true"
-      android:theme="@android:style/Theme.Translucent.NoTitleBar"
-      android:turnScreenOn="true" />
+        <activity
+            android:name=".plugin.audioPlugin.AudioActivity"
+            android:exported="true"
+            android:showWhenLocked="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:turnScreenOn="true" />
 
-    <meta-data
-      android:name="android.max_aspect"
-      android:value="2.4" /> <!-- 适配华为（huawei）刘海屏 -->
-    <meta-data
-      android:name="android.notch_support"
-      android:value="true" /> <!-- 适配小米（xiaomi）刘海屏 -->
-    <meta-data
-      android:name="notch.config"
-      android:value="portrait|landscape" />
+        <meta-data
+            android:name="android.max_aspect"
+            android:value="2.4" /> <!-- 适配华为（huawei）刘海屏 -->
+        <meta-data
+            android:name="android.notch_support"
+            android:value="true" /> <!-- 适配小米（xiaomi）刘海屏 -->
+        <meta-data
+            android:name="notch.config"
+            android:value="portrait|landscape" />
 
-    <activity
-      android:name=".MainActivity"
-      android:exported="true">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-        <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
-    </activity>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
-    <activity
-      android:name=".SonicServiceActivity"
-      android:exported="true">
-    </activity>
+        <activity
+            android:name=".SonicServiceActivity"
+            android:exported="true"></activity>
 
-    <activity
-      android:name=".plugin.activityPlugin.SearchActivity"
-      android:excludeFromRecents="true"
-      android:exported="true"
-      android:finishOnTaskLaunch="true"
-      android:noHistory="true"
-      android:stateNotNeeded="true">
-      <intent-filter>
-        <action android:name="org.cloud.sonic.android.ACTION_IDENTIFY" />
+        <activity
+            android:name=".plugin.activityPlugin.SearchActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:finishOnTaskLaunch="true"
+            android:noHistory="true"
+            android:stateNotNeeded="true">
+            <intent-filter>
+                <action android:name="org.cloud.sonic.android.ACTION_IDENTIFY" />
 
-        <category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-    </activity>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
-    <service
-      android:name=".service.SonicManagerService"
-      android:exported="false" />
+        <service
+            android:name=".service.SonicManagerService"
+            android:exported="false" />
 
-    <service
-      android:name=".plugin.SonicPluginAudioService"
-      android:enabled="true"
-      android:exported="false"
-      android:foregroundServiceType="mediaProjection"
-      android:process=":audioProcess"
-      tools:node="replace" />
-  </application>
+        <service
+            android:name=".service.SonicManagerServiceV2"
+            android:exported="true" />
+
+        <service
+            android:name=".plugin.SonicPluginAudioService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection"
+            android:process=":audioProcess"
+            tools:node="replace" />
+
+        <!-- Declares the input method service -->
+        <service
+            android:name=".keyboard.SonicKeyboard"
+            android:label="@string/keyboard_name"
+            android:exported="true"
+            android:permission="android.permission.BIND_INPUT_METHOD">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data
+                android:name="android.view.im"
+                android:resource="@xml/methods" />
+        </service>
+    </application>
 
 </manifest>
