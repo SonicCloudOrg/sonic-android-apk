@@ -134,7 +134,7 @@ class SonicKeyboard : InputMethodService(),TcpServerListener {
         LogUtils.d("客户端连接断开 ${tcpClient.getTargetInfo().ip}$msg$e")
     }
 
-    override fun onServerClosed(server: TcpServer, msg: String?, e: Exception) {
+    override fun onServerClosed(server: TcpServer, msg: String?, e: Exception?) {
         LogUtils.d("服务器关闭 $server$msg$e")
     }
 

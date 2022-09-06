@@ -36,6 +36,6 @@ interface TcpServerListener {
 
     fun onClientClosed(server: TcpServer, tcpClient: TcpClient, msg: String, e: Exception?)
 
-    fun onServerClosed(server: TcpServer, msg: String?, e: Exception)
+    fun onServerClosed(server: TcpServer, msg: String?, e: Exception?)
     
 }

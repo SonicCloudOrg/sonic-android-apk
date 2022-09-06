@@ -113,7 +113,8 @@ class SonicPluginAppList constructor(
           )
         )
         try {
-          val dataBytes: ByteArray = GsonUtils.toJson(tmpInfo).toByteArray()
+          val dataString: String = GsonUtils.toJson(tmpInfo)
+          val dataBytes: ByteArray = dataString.toByteArray()
           // 数据长度转成二进制，存入byte[32]
           val lengthBytes = ByteArray(32)
           val binStr = Integer.toBinaryString(dataBytes.size).trim { it <= ' ' }
@@ -134,7 +135,7 @@ class SonicPluginAppList constructor(
             x--
             y--
           }
-          return SonicSocketByte(lengthBytes,dataBytes)
+          return SonicSocketByte(lengthBytes,dataString)
         } catch (e: IOException) {
           e.printStackTrace()
         }

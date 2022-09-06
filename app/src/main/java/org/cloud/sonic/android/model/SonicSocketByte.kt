@@ -19,5 +19,5 @@ package org.cloud.sonic.android.model
 
 data class SonicSocketByte(
     val targetLength: ByteArray,
-    val targetByte: ByteArray
+    val targetByte: String
 )

@@ -15,8 +15,8 @@ import java.nio.ByteOrder
  */
 class TcpConnConfig private constructor() {
     var charsetName: String = CharsetUtil.UTF_8 //默认编码
-    var connTimeout: Long = 5000 //连接超时时间
-    val receiveTimeout: Long = 0 //接受消息的超时时间,0为无限大
+    var connTimeout: Int = 5000 //连接超时时间
+    val receiveTimeout: Int = 0 //接受消息的超时时间,0为无限大
     var byteOrder = ByteOrder.BIG_ENDIAN //大端还是小端
     private var mStickPackageHelper: AbsStickPackageHelper = BaseStickPackageHelper() //解决粘包
     private var mDecodeHelper: AbsDecodeHelper = BaseDecodeHelper() //解析数据
@@ -51,7 +51,7 @@ class TcpConnConfig private constructor() {
             return this
         }
 
-        fun setConnTimeout(timeout: Long): Builder {
+        fun setConnTimeout(timeout: Int): Builder {
             mTcpConnConfig.connTimeout = timeout
             return this
         }

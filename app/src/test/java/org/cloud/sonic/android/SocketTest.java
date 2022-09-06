@@ -20,14 +20,16 @@ public class SocketTest {
         System.out.println(socket.isConnected());
         Thread.sleep(1000);
         socket.getOutputStream().write("action_get_all_app_info".getBytes());
+//        socket.getOutputStream().write("action_get_all_wifi_info".getBytes());
         socket.getOutputStream().flush();
-        Thread.sleep(3000);
+//        Thread.sleep(3000);
         InputStream is = socket.getInputStream();
         InputStreamReader isr = new InputStreamReader(is);
         BufferedReader br = new BufferedReader(isr);
         System.out.println(br.readLine());
-        Thread.sleep(3000);
+        Thread.sleep(10000);
         socket.close();
         Runtime.getRuntime().exec("adb forward --remove tcp:2222");
+
     }
 }

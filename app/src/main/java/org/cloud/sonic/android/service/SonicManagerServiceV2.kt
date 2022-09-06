@@ -25,8 +25,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.blankj.utilcode.util.LogUtils
 import org.cloud.sonic.android.R
-import org.cloud.sonic.android.constants.Contants.ACTION_GET_ALL_APP_INFO
-import org.cloud.sonic.android.constants.Contants.ACTION_GET_ALL_WIFI_INFO
 import org.cloud.sonic.android.lib.socketmanager.tcp.client.TcpClient
 import org.cloud.sonic.android.lib.socketmanager.tcp.listener.TcpServerListener
 import org.cloud.sonic.android.lib.socketmanager.tcp.model.TcpMassage
@@ -37,7 +35,6 @@ import org.cloud.sonic.android.lib.socketmanager.tcp.service.config.TcpServerCon
 import org.cloud.sonic.android.lib.socketmanager.utils.CharsetUtil
 import org.cloud.sonic.android.plugin.SonicPluginAppList
 import org.cloud.sonic.android.plugin.SonicPluginWifiManager
-import java.io.*
 
 //@AndroidEntryPoint
 class SonicManagerServiceV2 : Service(), TcpServerListener {
@@ -235,10 +232,11 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
     private fun closeSocket() {
         isSocketStop = true
         mSonicTcpServer?.let {
-            if (it.isListening()) {
+            if(it.isListening()) {
                 it.stopServer()
             }
         }
+        mSonicTcpServer = null
         stopSelf()
     }
 
@@ -301,7 +299,7 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
         closeSocket()
     }
 
-    override fun onServerClosed(server: TcpServer, msg: String?, e: Exception) {
+    override fun onServerClosed(server: TcpServer, msg: String?, e: Exception?) {
         LogUtils.d("服务器关闭 $server$msg$e")
     }
 }
