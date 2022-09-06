@@ -88,6 +88,7 @@ class TcpServer : TcpClientListener {
             for (client in mMapTcpClients.values) {
                 client.disconnect()
             }
+            notifyTcpServerClosed(msg, e)
         }
         SonicSocketLog.d(TAG,"Tcp Server closed")
     }
@@ -144,7 +145,7 @@ class TcpServer : TcpClientListener {
     }
 
     private fun getServerSocket(): ServerSocket {
-        if (mServerSocket == null || mServerSocket!!.isClosed) {
+        if (mServerSocket == null || mServerSocket!!.isClosed()) {
             try {
                 mServerSocket = ServerSocket(mSocketPort)
                 setServerState(ServerState.Closed)
@@ -168,6 +169,7 @@ class TcpServer : TcpClientListener {
     }
 
     override fun onDisconnected(client: TcpClient, msg: String, e: Exception?) {
+        mMapTcpClients.remove(client.getTargetInfo())
         notifyTcpClientClosed(client, msg, e)
     }
 
@@ -229,7 +231,7 @@ class TcpServer : TcpClientListener {
         }
     }
 
-    private fun notifyTcpServerClosed(msg: String, e: java.lang.Exception) {
+    private fun notifyTcpServerClosed(msg: String, e: java.lang.Exception?) {
         for (wr in mTcpServerListeners) {
             runOnMainThread {
                 wr?.onServerClosed(this@TcpServer, msg, e)

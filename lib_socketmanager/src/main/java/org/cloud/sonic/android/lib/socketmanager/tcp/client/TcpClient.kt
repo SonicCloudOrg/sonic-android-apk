@@ -108,7 +108,7 @@ class TcpClient {
         if (mSocket == null || isDisconnected() || !mSocket!!.isConnected) {
             mSocket = Socket()
             try {
-                mSocket!!.soTimeout = mTcpConnConfig?.receiveTimeout as Int
+                mSocket!!.soTimeout = mTcpConnConfig?.receiveTimeout?:0
             } catch (e: SocketException) {
                 SonicSocketLog.e(TAG, "get Scoket error: ${e.message}")
             }
@@ -179,7 +179,7 @@ class TcpClient {
                         getSocket().bind(InetSocketAddress(localPort))
                     }
                 }
-                getSocket().connect(InetSocketAddress(mTargetInfo!!.ip, mTargetInfo!!.port), mTcpConnConfig!!.connTimeout as Int)
+                getSocket().connect(InetSocketAddress(mTargetInfo!!.ip, mTargetInfo!!.port), mTcpConnConfig!!.connTimeout)
                 SonicSocketLog.d(TAG, "创建连接成功,target=$mTargetInfo, localPort=$localPort")
             } catch (e: Exception) {
                 SonicSocketLog.d(TAG, "创建连接失败,target=$mTargetInfo,$e")
@@ -191,8 +191,11 @@ class TcpClient {
         }
     }
 
-    fun enqueueTcpMsg(TcpMassage: TcpMassage?): Boolean {
+    private fun enqueueTcpMsg(TcpMassage: TcpMassage?): Boolean {
+        SonicSocketLog.d(TAG, "enqueueTcpMsg")
+
         if (TcpMassage == null || getMsgQueue().contains(TcpMassage)) {
+            SonicSocketLog.d(TAG, "enqueueTcpMsg error")
             return false
         }
         try {

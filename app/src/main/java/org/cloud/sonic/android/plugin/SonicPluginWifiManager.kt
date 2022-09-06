@@ -23,7 +23,6 @@ import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.NetworkUtils
 import com.thanosfisherman.wifiutils.WifiUtils
 import org.cloud.sonic.android.lib.socketmanager.tcp.service.TcpServer
-import org.cloud.sonic.android.model.SonicSocketByte
 import org.cloud.sonic.android.model.SonicWifiInfo
 import org.cloud.sonic.android.model.SonicWifiPacket
 import java.io.IOException
@@ -112,7 +111,8 @@ class SonicPluginWifiManager constructor(
             )
 
             try {
-                val dataBytes: ByteArray = GsonUtils.toJson(sendPacket).toByteArray()
+                val dataString: String = GsonUtils.toJson(sendPacket)
+                val dataBytes: ByteArray = dataString.toByteArray()
                 // 数据长度转成二进制，存入byte[32]
                 val lengthBytes = ByteArray(32)
                 val binStr = Integer.toBinaryString(dataBytes.size).trim { it <= ' ' }
@@ -134,7 +134,7 @@ class SonicPluginWifiManager constructor(
                     y--
                 }
                 sonicTcpServer?.sendMsgToAll(lengthBytes)
-                sonicTcpServer?.sendMsgToAll(dataBytes)
+                sonicTcpServer?.sendMsgToAll(dataString)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
