@@ -112,29 +112,7 @@ class SonicPluginWifiManager constructor(
 
             try {
                 val dataString: String = GsonUtils.toJson(sendPacket)
-                val dataBytes: ByteArray = dataString.toByteArray()
-                // 数据长度转成二进制，存入byte[32]
-                val lengthBytes = ByteArray(32)
-                val binStr = Integer.toBinaryString(dataBytes.size).trim { it <= ' ' }
-                val binArray = binStr.toCharArray()
-                var x = binArray.size - 1
-                var y = lengthBytes.size - 1
-                while (x >= 0) {
-                    try {
-                        lengthBytes[y] = (binArray[x].toString() + "").toByte()
-                    } catch (e: Exception) {
-                        LogUtils.e(
-                            String.format(
-                                "char转byte失败，char为：【%s】",
-                                binArray[x].toString() + ""
-                            )
-                        )
-                    }
-                    x--
-                    y--
-                }
-                sonicTcpServer?.sendMsgToAll(lengthBytes)
-                sonicTcpServer?.sendMsgToAll(dataString)
+                sonicTcpServer?.sendMsgToAll(dataString + "\n")
             } catch (e: IOException) {
                 e.printStackTrace()
             }

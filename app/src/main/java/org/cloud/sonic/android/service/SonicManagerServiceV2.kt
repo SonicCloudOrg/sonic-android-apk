@@ -233,6 +233,7 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
         isSocketStop = true
         mSonicTcpServer?.let {
             if(it.isListening()) {
+                it.removeTcpServerListener(this)
                 it.stopServer()
             }
         }
@@ -243,12 +244,7 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
     private fun processReceiveMsg(msg: String) {
         when (msg) {
             ACTION_STOP -> closeSocket()
-            ACTION_GET_ALL_APP_INFO -> {
-                appListPlugin.getAllAppInfo()?.let {
-                    mSonicTcpServer?.sendMsgToAll(it.targetLength)
-                    mSonicTcpServer?.sendMsgToAll(it.targetByte)
-                }
-            }
+            ACTION_GET_ALL_APP_INFO -> appListPlugin.getAllAppInfo(mSonicTcpServer)
             ACTION_GET_ALL_WIFI_INFO -> wifiManager.getAllWifiList(mSonicTcpServer)
             else -> LogUtils.w("service action is $msg")
         }
@@ -264,6 +260,7 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
 
     override fun onAccept(server: TcpServer, tcpClient: TcpClient) {
         LogUtils.d("收到客户端连接请求 ${tcpClient.getTargetInfo().ip}")
+        mHandler.removeMessages(LINK_SOCKET_TIMEOUT_MSG)
     }
 
     override fun onSent(server: TcpServer, tcpClient: TcpClient, tcpMsg: TcpMassage) {
