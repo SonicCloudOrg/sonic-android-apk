@@ -30,16 +30,6 @@
 >
 >If you want to support, you can give me a star. ⭐
 
-#### What can sonic do ?
-
-+ 0 coding for automated testing
-+ Make full use of devices (24hours)
-+ Remotely control your device (Android,iOS)
-+ Perform UI automation tests,Stability tests and Traversal tests with devices
-+ Connect CI/CD platform (Jenkins)
-+ Visual report
-+ And more...
-
 ## How to package
 
 ```
