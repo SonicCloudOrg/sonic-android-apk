@@ -65,4 +65,29 @@ public class SocketTest {
         socket.close();
         Runtime.getRuntime().exec("adb forward --remove tcp:2222");
     }
+
+    @Test
+    public void test3() throws IOException, InterruptedException {
+        Runtime.getRuntime().exec("adb shell am start -n org.cloud.sonic.android/.plugin.audioPlugin.AudioActivity");
+        Runtime.getRuntime().exec("adb forward tcp:2222 localabstract:sonicaudioservice");
+        Thread.sleep(1000);
+        Socket socket = new Socket("localhost",2222);
+        System.out.println(socket.isConnected());
+        Thread.sleep(1000);
+        InputStream is = socket.getInputStream();
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(isr);
+        String s;
+        while (true){
+            try {
+                if ((s = br.readLine()) == null) break;
+            }catch (IOException e){
+                e.printStackTrace();
+                break;
+            }
+            System.out.println(s);
+        }
+        socket.close();
+        Runtime.getRuntime().exec("adb forward --remove tcp:2222");
+    }
 }

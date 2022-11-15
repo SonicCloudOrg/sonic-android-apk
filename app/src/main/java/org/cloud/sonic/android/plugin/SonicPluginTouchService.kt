@@ -45,7 +45,8 @@ class SonicPluginTouchService(var width: Int = 0, var handler: Handler?) :
     private val TAG = "SonicPluginTouchService"
     private val SOCKET = "sonictouchservice"
     private val DEFAULT_MAX_CONTACTS = 10
-    val LINK_SOCKET_TIMEOUT = 30 * 1000
+    val LINK_SOCKET_TIMEOUT = 15 * 1000
+    private var isConnect = false;
 
     private var serverSocket: LocalServerSocket? = null
 
@@ -202,11 +203,19 @@ class SonicPluginTouchService(var width: Int = 0, var handler: Handler?) :
             return
         }
 
+        Thread() {
+            sleep(LINK_SOCKET_TIMEOUT.toLong())
+            if (!isConnect) {
+                exitProcess(0)
+            }
+        }.start()
+
         Log.i(TAG, String.format("Listening on %s", SOCKET))
         var clientSocket: LocalSocket?
         try {
             clientSocket = serverSocket!!.accept()
             Log.i(TAG, "client connected")
+            isConnect = true
             processLoop(clientSocket)
         } catch (e: IOException) {
             Log.i(TAG, "error")
