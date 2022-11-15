@@ -1,18 +1,19 @@
 /*
- *  Copyright (C) [SonicCloudOrg] Sonic Project
+ *  sonic-android-apk  Help your Android device to do more.
+ *  Copyright (C) 2022 SonicCloudOrg
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.cloud.sonic.android.service
 
@@ -44,7 +45,6 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
         private const val ACTION_TIME_OUT = "LINK_SOCKET_TIMEOUT"
         private const val ACTION_GET_ALL_APP_INFO = "action_get_all_app_info"
         private const val ACTION_GET_ALL_WIFI_INFO = "action_get_all_wifi_info"
-        private const val SONIC_MANAGER_SOCKET = "sonicmanagersocket"
         private const val SONIC_MANAGER_SOCKET_PORT = "2334"
         private const val NOTIFICATION_ID = 1
         private const val REC_SERVICE_ACTION = 1

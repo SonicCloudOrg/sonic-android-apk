@@ -15,16 +15,11 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.cloud.sonic.android
+package org.cloud.sonic.android.plugin.controllerPlugin
 
-import android.app.Application
-import com.blankj.utilcode.util.Utils
-
-//@HiltAndroidApp
-class App:Application() {
-    override fun onCreate() {
-        super.onCreate()
-        //初始化工具类
-        Utils.init(this)
-    }
+class Event {
+    var down: Long = 0
+    var x = 0
+    var y = 0
+    var action = 0
 }
