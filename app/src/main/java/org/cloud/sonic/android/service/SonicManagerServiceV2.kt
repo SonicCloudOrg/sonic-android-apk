@@ -1,18 +1,19 @@
 /*
- *  Copyright (C) [SonicCloudOrg] Sonic Project
+ *  sonic-android-apk  Help your Android device to do more.
+ *  Copyright (C) 2022 SonicCloudOrg
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.cloud.sonic.android.service
 
@@ -25,8 +26,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.blankj.utilcode.util.LogUtils
 import org.cloud.sonic.android.R
-import org.cloud.sonic.android.constants.Contants.ACTION_GET_ALL_APP_INFO
-import org.cloud.sonic.android.constants.Contants.ACTION_GET_ALL_WIFI_INFO
 import org.cloud.sonic.android.lib.socketmanager.tcp.client.TcpClient
 import org.cloud.sonic.android.lib.socketmanager.tcp.listener.TcpServerListener
 import org.cloud.sonic.android.lib.socketmanager.tcp.model.TcpMassage
@@ -37,7 +36,6 @@ import org.cloud.sonic.android.lib.socketmanager.tcp.service.config.TcpServerCon
 import org.cloud.sonic.android.lib.socketmanager.utils.CharsetUtil
 import org.cloud.sonic.android.plugin.SonicPluginAppList
 import org.cloud.sonic.android.plugin.SonicPluginWifiManager
-import java.io.*
 
 //@AndroidEntryPoint
 class SonicManagerServiceV2 : Service(), TcpServerListener {
@@ -47,7 +45,6 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
         private const val ACTION_TIME_OUT = "LINK_SOCKET_TIMEOUT"
         private const val ACTION_GET_ALL_APP_INFO = "action_get_all_app_info"
         private const val ACTION_GET_ALL_WIFI_INFO = "action_get_all_wifi_info"
-        private const val SONIC_MANAGER_SOCKET = "sonicmanagersocket"
         private const val SONIC_MANAGER_SOCKET_PORT = "2334"
         private const val NOTIFICATION_ID = 1
         private const val REC_SERVICE_ACTION = 1
@@ -235,22 +232,19 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
     private fun closeSocket() {
         isSocketStop = true
         mSonicTcpServer?.let {
-            if (it.isListening()) {
+            if(it.isListening()) {
+                it.removeTcpServerListener(this)
                 it.stopServer()
             }
         }
+        mSonicTcpServer = null
         stopSelf()
     }
 
     private fun processReceiveMsg(msg: String) {
         when (msg) {
             ACTION_STOP -> closeSocket()
-            ACTION_GET_ALL_APP_INFO -> {
-                appListPlugin.getAllAppInfo()?.let {
-                    mSonicTcpServer?.sendMsgToAll(it.targetLength)
-                    mSonicTcpServer?.sendMsgToAll(it.targetByte)
-                }
-            }
+            ACTION_GET_ALL_APP_INFO -> appListPlugin.getAllAppInfo(mSonicTcpServer)
             ACTION_GET_ALL_WIFI_INFO -> wifiManager.getAllWifiList(mSonicTcpServer)
             else -> LogUtils.w("service action is $msg")
         }
@@ -266,6 +260,7 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
 
     override fun onAccept(server: TcpServer, tcpClient: TcpClient) {
         LogUtils.d("收到客户端连接请求 ${tcpClient.getTargetInfo().ip}")
+        mHandler.removeMessages(LINK_SOCKET_TIMEOUT_MSG)
     }
 
     override fun onSent(server: TcpServer, tcpClient: TcpClient, tcpMsg: TcpMassage) {
@@ -298,9 +293,10 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
         e: Exception?
     ) {
         LogUtils.d("客户端连接断开 ${tcpClient.getTargetInfo().ip}$msg$e")
+        closeSocket()
     }
 
-    override fun onServerClosed(server: TcpServer, msg: String?, e: Exception) {
+    override fun onServerClosed(server: TcpServer, msg: String?, e: Exception?) {
         LogUtils.d("服务器关闭 $server$msg$e")
     }
 }

@@ -1,18 +1,19 @@
 /*
- *  Copyright (C) [SonicCloudOrg] Sonic Project
+ *  sonic-android-apk  Help your Android device to do more.
+ *  Copyright (C) 2022 SonicCloudOrg
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.cloud.sonic.android.plugin.touchPlugin.touchCompat
 
@@ -21,99 +22,90 @@ import android.os.RemoteException
 import android.view.IRotationWatcher
 import java.lang.reflect.InvocationTargetException
 
+/**
+ * @see https://github.com/openstf/STFService.apk/blob/master/app/src/main/java/jp/co/cyberagent/stf/compat/WindowManagerWrapper.java
+ */
 class WindowManagerWrapper {
-  private var windowManager: Any? = null
+    private var windowManager: Any? = null
 
-  companion object {
-    fun getBinder(name: String): Any {
-      val ServiceManager = Class.forName("android.os.ServiceManager")
-      val getService = ServiceManager.getMethod(
-        "getService",
-        String::class.java
-      )
-      return getService.invoke(null, name)
+    init {
+        windowManager = getWindowManager()
     }
 
-    fun getService(serviceName: String, interfaceClass: String): Any {
-      val serviceBinder = getBinder(serviceName)
-      val Stub = Class.forName(interfaceClass)
-      val asInterface = Stub.getMethod("asInterface", IBinder::class.java)
-      return asInterface.invoke(null, serviceBinder)
+    companion object {
+        private fun getBinder(name: String): Any {
+            val serviceManager = Class.forName("android.os.ServiceManager")
+            val getService = serviceManager.getMethod(
+                "getService",
+                String::class.java
+            )
+            return getService.invoke(null, name)
+        }
+
+        private fun getService(serviceName: String, interfaceClass: String): Any {
+            val serviceBinder = getBinder(serviceName)
+            val s = Class.forName(interfaceClass)
+            val asInterface = s.getMethod("asInterface", IBinder::class.java)
+            return asInterface.invoke(null, serviceBinder)
+        }
+
+        fun getWindowManager(): Any? {
+            return getService("window", "android.view.IWindowManager\$Stub")
+        }
+
     }
 
-    fun getWindowManager(): Any? {
-      return getService("window", "android.view.IWindowManager\$Stub")
+    fun watchRotation(watcher: RotationWatcher): Any {
+        val realWatcher: IRotationWatcher = object : IRotationWatcher.Stub() {
+            @Throws(RemoteException::class)
+            override fun onRotationChanged(rotation: Int) {
+                watcher.onRotationChanged(rotation)
+            }
+        }
+
+        return try {
+            val getter = windowManager!!.javaClass.getMethod(
+                "watchRotation",
+                IRotationWatcher::class.java,
+                Int::class.javaPrimitiveType
+            )
+            getter.invoke(windowManager, realWatcher, 0)
+            realWatcher
+        } catch (e: NoSuchMethodException) {
+            try {
+                val getter = windowManager!!.javaClass.getMethod(
+                    "watchRotation",
+                    IRotationWatcher::class.java
+                )
+                getter.invoke(windowManager, realWatcher)
+                realWatcher
+            } catch (e2: java.lang.Exception) {
+                throw UnsupportedOperationException("UnsupportedOperationException: " + e2.message)
+            }
+        } catch (e: IllegalAccessException) {
+            e.printStackTrace()
+        } catch (e: InvocationTargetException) {
+            e.printStackTrace()
+        }
     }
 
-  }
-
-  init {
-    windowManager = getWindowManager()
-  }
-
-  fun getRotation(): Int {
-    try {
-      val getter = windowManager!!.javaClass.getMethod("getDefaultDisplayRotation")
-      return getter.invoke(windowManager) as Int
-    } catch (e: NoSuchMethodException) {
-    } catch (e: IllegalAccessException) {
-      e.printStackTrace()
-    } catch (e: InvocationTargetException) {
-      e.printStackTrace()
-    }
-    try {
-      val getter = windowManager!!.javaClass.getMethod("getRotation")
-      return getter.invoke(windowManager) as Int
-    } catch (e: NoSuchMethodException) {
-      e.printStackTrace()
-    } catch (e: IllegalAccessException) {
-      e.printStackTrace()
-    } catch (e: InvocationTargetException) {
-      e.printStackTrace()
-    }
-    return 0
-  }
-
-
-  fun watchRotation(watcher: RotationWatcher): Any {
-    val realWatcher: IRotationWatcher = object : IRotationWatcher.Stub() {
-      @Throws(RemoteException::class)
-      override fun onRotationChanged(rotation: Int) {
-        watcher.onRotationChanged(rotation)
-      }
+    fun getRotation(): Int {
+        try {
+            val getter = windowManager!!.javaClass.getMethod("getDefaultDisplayRotation")
+            return getter.invoke(windowManager) as Int
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+        try {
+            val getter = windowManager!!.javaClass.getMethod("getRotation")
+            return getter.invoke(windowManager) as Int
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return 0
     }
 
-    return try {
-      val getter = windowManager!!.javaClass.getMethod(
-        "watchRotation",
-        IRotationWatcher::class.java,
-        Int::class.javaPrimitiveType
-      )
-      getter.invoke(windowManager, realWatcher, 0)
-      realWatcher
-    } catch (e: NoSuchMethodException) {
-      try {
-        val getter = windowManager!!.javaClass.getMethod(
-          "watchRotation",
-          IRotationWatcher::class.java
-        )
-        getter.invoke(windowManager, realWatcher)
-        realWatcher
-      } catch (e2: NoSuchMethodException) {
-        throw UnsupportedOperationException("watchRotation is not supported: " + e2.message)
-      } catch (e2: IllegalAccessException) {
-        throw UnsupportedOperationException("watchRotation is not supported: " + e2.message)
-      } catch (e2: InvocationTargetException) {
-        throw UnsupportedOperationException("watchRotation is not supported: " + e2.message)
-      }
-    } catch (e: IllegalAccessException) {
-      throw UnsupportedOperationException("watchRotation is not supported: " + e.message)
-    } catch (e: InvocationTargetException) {
-      throw UnsupportedOperationException("watchRotation is not supported: " + e.message)
+    interface RotationWatcher {
+        fun onRotationChanged(rotation: Int)
     }
-  }
-
-  interface RotationWatcher {
-    fun onRotationChanged(rotation: Int)
-  }
 }

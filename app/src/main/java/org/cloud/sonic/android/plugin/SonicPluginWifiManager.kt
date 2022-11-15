@@ -1,18 +1,19 @@
 /*
- *  Copyright (C) [SonicCloudOrg] Sonic Project
+ *  sonic-android-apk  Help your Android device to do more.
+ *  Copyright (C) 2022 SonicCloudOrg
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.cloud.sonic.android.plugin
 
@@ -23,7 +24,6 @@ import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.NetworkUtils
 import com.thanosfisherman.wifiutils.WifiUtils
 import org.cloud.sonic.android.lib.socketmanager.tcp.service.TcpServer
-import org.cloud.sonic.android.model.SonicSocketByte
 import org.cloud.sonic.android.model.SonicWifiInfo
 import org.cloud.sonic.android.model.SonicWifiPacket
 import java.io.IOException
@@ -112,29 +112,8 @@ class SonicPluginWifiManager constructor(
             )
 
             try {
-                val dataBytes: ByteArray = GsonUtils.toJson(sendPacket).toByteArray()
-                // 数据长度转成二进制，存入byte[32]
-                val lengthBytes = ByteArray(32)
-                val binStr = Integer.toBinaryString(dataBytes.size).trim { it <= ' ' }
-                val binArray = binStr.toCharArray()
-                var x = binArray.size - 1
-                var y = lengthBytes.size - 1
-                while (x >= 0) {
-                    try {
-                        lengthBytes[y] = (binArray[x].toString() + "").toByte()
-                    } catch (e: Exception) {
-                        LogUtils.e(
-                            String.format(
-                                "char转byte失败，char为：【%s】",
-                                binArray[x].toString() + ""
-                            )
-                        )
-                    }
-                    x--
-                    y--
-                }
-                sonicTcpServer?.sendMsgToAll(lengthBytes)
-                sonicTcpServer?.sendMsgToAll(dataBytes)
+                val dataString: String = GsonUtils.toJson(sendPacket)
+                sonicTcpServer?.sendMsgToAll(dataString + "\n")
             } catch (e: IOException) {
                 e.printStackTrace()
             }
