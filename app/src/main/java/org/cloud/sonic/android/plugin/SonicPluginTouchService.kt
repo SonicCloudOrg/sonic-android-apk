@@ -37,6 +37,9 @@ import java.io.InputStreamReader
 import java.util.*
 import kotlin.system.exitProcess
 
+/**
+ * @see https://github.com/openstf/STFService.apk/blob/master/app/src/main/java/jp/co/cyberagent/stf/MinitouchAgent.java
+ */
 class SonicPluginTouchService(var width: Int = 0, var handler: Handler?) :
     Thread() {
     private val TAG = "SonicPluginTouchService"

@@ -22,6 +22,9 @@ import android.view.KeyEvent
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
+/**
+ * @see https://github.com/openstf/STFService.apk/blob/master/app/src/main/java/jp/co/cyberagent/stf/compat/InputManagerWrapper.java
+ */
 class InputManagerWrapper {
   private var eventInjector: EventInjector
 

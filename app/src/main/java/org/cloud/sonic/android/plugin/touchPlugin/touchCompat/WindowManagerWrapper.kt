@@ -22,6 +22,9 @@ import android.os.RemoteException
 import android.view.IRotationWatcher
 import java.lang.reflect.InvocationTargetException
 
+/**
+ * @see https://github.com/openstf/STFService.apk/blob/master/app/src/main/java/jp/co/cyberagent/stf/compat/WindowManagerWrapper.java
+ */
 class WindowManagerWrapper {
     private var windowManager: Any? = null
 
