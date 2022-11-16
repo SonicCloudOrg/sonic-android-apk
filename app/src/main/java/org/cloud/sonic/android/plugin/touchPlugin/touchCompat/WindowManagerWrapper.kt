@@ -23,7 +23,11 @@ import android.view.IRotationWatcher
 import java.lang.reflect.InvocationTargetException
 
 /**
+ * ***************************************************************************
+ * This code is built with reference to STFService.apk
+ *
  * @see https://github.com/openstf/STFService.apk/blob/master/app/src/main/java/jp/co/cyberagent/stf/compat/WindowManagerWrapper.java
+ * ***************************************************************************
  */
 class WindowManagerWrapper {
     private var windowManager: Any? = null

@@ -31,6 +31,13 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import java.lang.reflect.InvocationTargetException
 
+/**
+ * ***************************************************************************
+ * This code is built with reference to STFService.apk
+ *
+ * @see https://github.com/openstf/STFService.apk/blob/master/app/src/main/java/jp/co/cyberagent/stf/IdentityActivity.java
+ * ***************************************************************************
+ */
 class SearchActivity : Activity() {
 
   @SuppressLint("MissingPermission")

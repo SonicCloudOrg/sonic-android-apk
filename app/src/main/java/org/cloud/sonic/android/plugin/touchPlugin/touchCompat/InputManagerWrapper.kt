@@ -23,7 +23,11 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
 /**
+ * ***************************************************************************
+ * This code is built with reference to STFService.apk
+ *
  * @see https://github.com/openstf/STFService.apk/blob/master/app/src/main/java/jp/co/cyberagent/stf/compat/InputManagerWrapper.java
+ * ***************************************************************************
  */
 class InputManagerWrapper {
   private var eventInjector: EventInjector

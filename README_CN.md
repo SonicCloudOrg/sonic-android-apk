@@ -35,9 +35,6 @@
 gradlew assembleDebug
 ```
 
-## 感谢
-[Device Farmer](https://github.com/DeviceFarmer)
-
 ## 赞助商
 
 感谢所有赞助商！
@@ -50,3 +47,5 @@ gradlew assembleDebug
 ## 开源许可协议
 
 [License](LICENSE)
+
+- 代码部分内容参考了 STFService.apk [Apache 2.0 License](https://github.com/openstf/STFService.apk/blob/master/LICENSE)

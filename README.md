@@ -36,9 +36,6 @@
 gradlew assembleDebug
 ```
 
-## Thanks
-[Device Farmer](https://github.com/DeviceFarmer)
-
 ## Sponsors
 
 Thank you to all our sponsors!
@@ -51,5 +48,6 @@ Thank you to all our sponsors!
 
 [License](LICENSE)
 
+- This code is built with reference to STFService.apk [Apache 2.0 License](https://github.com/openstf/STFService.apk/blob/master/LICENSE)
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSonicCloudOrg%2Fsonic-android-apk.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FSonicCloudOrg%2Fsonic-android-apk?ref=badge_large)
