@@ -36,11 +36,12 @@ import org.cloud.sonic.android.lib.socketmanager.utils.CharsetUtil
 /**
  * sonic 输入法
  */
-class SonicKeyboard : InputMethodService(),TcpServerListener {
+class SonicKeyboard : InputMethodService(), TcpServerListener {
 
     companion object {
         private const val SONIC_KEYBOARD_SOCKET_PORT = "2335"
     }
+
     private var mSonicTcpServer: TcpServer? = null
 
     override fun onCreateInputView(): View {
@@ -95,30 +96,35 @@ class SonicKeyboard : InputMethodService(),TcpServerListener {
 
     override fun onReceive(server: TcpServer, tcpClient: TcpClient, tcpMsg: TcpMassage) {
         //处理收到消息
-        val msg = CharsetUtil.dataToString(
+        var msg = CharsetUtil.dataToString(
             tcpMsg.getSourceDataBytes(),
             CharsetUtil.UTF_8
         )
-        if (msg.contains("CODE_AC_ENTER")){
-            if (!sendDefaultEditorAction(true)) {
-                sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-            }
-        }else if (msg.contains("CODE_AC_BACK")){
-            currentInputConnection.also { ic: InputConnection ->
-                ic.deleteSurroundingText(1,0)
-            }
-        } else if(msg.contains("CODE_AC_CLEAN")){
-            currentInputConnection.also { ic: InputConnection ->
-                val curPos: CharSequence = ic.getExtractedText(ExtractedTextRequest(), 0).text
-                val beforePos: CharSequence? = ic.getTextBeforeCursor(curPos.length, 0)
-                val afterPos: CharSequence? = ic.getTextAfterCursor(curPos.length, 0)
-                if (beforePos != null && afterPos !=null){
-                    ic.deleteSurroundingText(beforePos.length, afterPos.length)
+
+        var result = msg.split("CODE_AC_ENTER|CODE_AC_BACK|CODE_AC_CLEAN")
+
+        for (r in result) {
+            if (r == "CODE_AC_ENTER") {
+                if (!sendDefaultEditorAction(true)) {
+                    sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
                 }
-            }
-        } else {
-            currentInputConnection.also { ic: InputConnection ->
-                ic.commitText(msg, 1)
+            } else if (r == "CODE_AC_BACK") {
+                currentInputConnection.also { ic: InputConnection ->
+                    ic.deleteSurroundingText(1, 0)
+                }
+            } else if (r == "CODE_AC_CLEAN") {
+                currentInputConnection.also { ic: InputConnection ->
+                    val curPos: CharSequence = ic.getExtractedText(ExtractedTextRequest(), 0).text
+                    val beforePos: CharSequence? = ic.getTextBeforeCursor(curPos.length, 0)
+                    val afterPos: CharSequence? = ic.getTextAfterCursor(curPos.length, 0)
+                    if (beforePos != null && afterPos != null) {
+                        ic.deleteSurroundingText(beforePos.length, afterPos.length)
+                    }
+                }
+            } else {
+                currentInputConnection.also { ic: InputConnection ->
+                    ic.commitText(r, 1)
+                }
             }
         }
     }
