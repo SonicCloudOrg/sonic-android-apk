@@ -48,4 +48,4 @@ gradlew assembleDebug
 
 [License](LICENSE)
 
-- 代码部分内容参考了 STFService.apk [Apache 2.0 License](https://github.com/openstf/STFService.apk/blob/master/LICENSE)
+- 代码部分内容参考了 [STFService.apk](https://github.com/openstf/STFService.apk) license: [Apache 2.0 License](licenses/LICENSE.STFServiceApk)
