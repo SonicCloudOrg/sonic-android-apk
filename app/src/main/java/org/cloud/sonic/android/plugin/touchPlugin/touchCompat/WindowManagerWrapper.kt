@@ -97,7 +97,10 @@ class WindowManagerWrapper {
         try {
             val getter = windowManager!!.javaClass.getMethod("getDefaultDisplayRotation")
             return getter.invoke(windowManager) as Int
-        } catch (e: java.lang.Exception) {
+        } catch (e: NoSuchMethodException) {
+        } catch (e: IllegalAccessException) {
+            e.printStackTrace()
+        } catch (e: InvocationTargetException) {
             e.printStackTrace()
         }
         try {
