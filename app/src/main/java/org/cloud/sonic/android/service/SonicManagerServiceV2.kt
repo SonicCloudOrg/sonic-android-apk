@@ -111,7 +111,7 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         LogUtils.i("onStartCommand")
-        val action = intent!!.action
+        val action = intent?.action
         if (ACTION_STOP == action) {
             closeSocket()
             return START_NOT_STICKY
@@ -232,7 +232,7 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
     private fun closeSocket() {
         isSocketStop = true
         mSonicTcpServer?.let {
-            if(it.isListening()) {
+            if (it.isListening()) {
                 it.removeTcpServerListener(this)
                 it.stopServer()
             }

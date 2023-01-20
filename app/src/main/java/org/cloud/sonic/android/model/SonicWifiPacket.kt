@@ -29,7 +29,7 @@ data class SonicWifiPacket(
 
 data class SonicWifiInfo(
     var SSID: String = "",
-    var BSSID: String = "",
+    var BSSID: String ?= "",
     var capabilities: String = "",
     var ipAddress: String = "",
     var macAddress: String = ""

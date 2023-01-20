@@ -81,7 +81,7 @@ class SonicPluginTouchService(var width: Int = 0, var handler: Handler?) :
         @JvmStatic
         fun main(args: Array<String>) {
             try {
-                Looper.prepare()
+                Looper.prepareMainLooper()
                 val handler = Handler()
                 val size: Point? = getScreenSize()
                 if (size != null) {
