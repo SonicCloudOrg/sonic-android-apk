@@ -83,7 +83,7 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
         LogUtils.i("onCreate")
         appListPlugin = SonicPluginAppList(this)
         wifiManager = SonicPluginWifiManager(this)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notification = createNotificationWithAndroidO(false)
             val channel = NotificationChannel(
                 CHANNEL_ID,
