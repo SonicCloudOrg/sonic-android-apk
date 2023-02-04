@@ -21,8 +21,10 @@ package org.cloud.sonic.android.keyboard
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.IntentFilter
 import android.inputmethodservice.InputMethodService
+import android.provider.Settings
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.ExtractedTextRequest
@@ -45,6 +47,11 @@ class SonicKeyboard : InputMethodService() {
             val filter = IntentFilter(IME_RECOVER_MESSAGE)
             mReceiver = AdbReceiver()
             registerReceiver(mReceiver, filter)
+        }
+        mInputView.setOnClickListener {
+            val intent = Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)
+            intent.flags = FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
         }
 
         return mInputView
