@@ -18,17 +18,8 @@
 <a href="https://app.fossa.com/projects/git%2Bgithub.com%2FSonicCloudOrg%2Fsonic-android-apk?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FSonicCloudOrg%2Fsonic-android-apk.svg?type=shield"/></a>
 </p>
 
-### Official Website
-[Sonic Official Website](https://sonic-cloud.gitee.io)
-## Background
-
-#### What is sonic ?
-
-> Sonic is a platform that integrates remote control debugging and automated testing of mobile devices, and strives to create a better use experience for global developers and test engineers.
->
->If you want to participate, welcome to join us! 💪
->
->If you want to support, you can give me a star. ⭐
+## Document
+[Sonic Official Website](https://sonic-cloud.cn/saa/re-saa.html)
 
 ## How to package
 
