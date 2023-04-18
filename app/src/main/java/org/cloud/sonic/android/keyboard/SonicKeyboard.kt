@@ -18,6 +18,7 @@
 
 package org.cloud.sonic.android.keyboard
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.*
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
@@ -52,6 +53,7 @@ class SonicKeyboard : InputMethodService() {
 
     var mReceiver: BroadcastReceiver? = null
 
+    @SuppressLint("InflateParams")
     override fun onCreateInputView(): View {
         val mInputView: View = layoutInflater.inflate(R.layout.view, null)
         if (mReceiver == null) {
@@ -81,43 +83,46 @@ class SonicKeyboard : InputMethodService() {
     inner class AdbReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             LogUtils.d(TAG, intent.toString())
-            if (intent.action == IME_RECOVER_MESSAGE) {
-                val msg = intent.getStringExtra(EXTRA_MSG)
-                val result = msg?.split("CODE_AC_ENTER|CODE_AC_BACK|CODE_AC_CLEAN")
-                result?.let {
-                    for (r in it) {
-                        if (r == "CODE_AC_ENTER") {
-                            if (!sendDefaultEditorAction(true)) {
-                                sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-                            }
-                        } else if (r == "CODE_AC_BACK") {
-                            currentInputConnection.also { ic: InputConnection ->
-                                ic.deleteSurroundingText(1, 0)
-                            }
-                        } else if (r == "CODE_AC_CLEAN") {
-                            currentInputConnection.also { ic: InputConnection ->
-                                val curPos: CharSequence =
-                                    ic.getExtractedText(ExtractedTextRequest(), 0).text
-                                val beforePos: CharSequence? =
-                                    ic.getTextBeforeCursor(curPos.length, 0)
-                                val afterPos: CharSequence? =
-                                    ic.getTextAfterCursor(curPos.length, 0)
-                                if (beforePos != null && afterPos != null) {
-                                    ic.deleteSurroundingText(beforePos.length, afterPos.length)
+            when (intent.action) {
+                IME_RECOVER_MESSAGE -> {
+                    val msg = intent.getStringExtra(EXTRA_MSG)
+                    val result = msg?.split("CODE_AC_ENTER|CODE_AC_BACK|CODE_AC_CLEAN")
+                    result?.let {
+                        for (r in it) {
+                            if (r == "CODE_AC_ENTER") {
+                                if (!sendDefaultEditorAction(true)) {
+                                    sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
                                 }
-                            }
-                        } else {
-                            currentInputConnection.also { ic: InputConnection ->
-                                ic.commitText(r, 1)
+                            } else if (r == "CODE_AC_BACK") {
+                                currentInputConnection.also { ic: InputConnection ->
+                                    ic.deleteSurroundingText(1, 0)
+                                }
+                            } else if (r == "CODE_AC_CLEAN") {
+                                currentInputConnection.also { ic: InputConnection ->
+                                    val curPos: CharSequence =
+                                        ic.getExtractedText(ExtractedTextRequest(), 0).text
+                                    val beforePos: CharSequence? =
+                                        ic.getTextBeforeCursor(curPos.length, 0)
+                                    val afterPos: CharSequence? =
+                                        ic.getTextAfterCursor(curPos.length, 0)
+                                    if (beforePos != null && afterPos != null) {
+                                        ic.deleteSurroundingText(beforePos.length, afterPos.length)
+                                    }
+                                }
+                            } else {
+                                currentInputConnection.also { ic: InputConnection ->
+                                    ic.commitText(r, 1)
+                                }
                             }
                         }
                     }
                 }
-            }
-            else if (intent.action == IME_RECOVER_CLIPBOARD_GET) {
-                processClipboardGet();
-            } else if (intent.action == IME_RECOVER_CLIPBOARD_SET) {
-                processClipboardSet(intent)
+                IME_RECOVER_CLIPBOARD_GET -> {
+                    processClipboardGet()
+                }
+                IME_RECOVER_CLIPBOARD_SET -> {
+                    processClipboardSet(intent)
+                }
             }
         }
 
