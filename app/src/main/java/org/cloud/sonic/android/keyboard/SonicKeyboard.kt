@@ -18,25 +18,36 @@
 
 package org.cloud.sonic.android.keyboard
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
+import android.app.Activity
+import android.content.*
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import android.content.IntentFilter
 import android.inputmethodservice.InputMethodService
 import android.provider.Settings
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.ExtractedTextRequest
 import android.view.inputmethod.InputConnection
+import com.blankj.utilcode.util.LogUtils
+import com.blankj.utilcode.util.Utils
 import org.cloud.sonic.android.R
 
 /**
- * sonic 输入法
+ *  @author : jeffery
+ *  @date : 2023/4/17 19:56
+ *  @email : jayw2016@outlook.com
+ *  @github : https://github.com/wzasd
+ *  description : Sonic Keyboard and clipboard
  */
 class SonicKeyboard : InputMethodService() {
     companion object {
+        private const val TAG = "SonicKeyboard"
+
         const val IME_RECOVER_MESSAGE = "SONIC_KEYBOARD"
+
+        private const val IME_RECOVER_CLIPBOARD_GET = "SONIC_CLIPPER_GET"
+        private const val IME_RECOVER_CLIPBOARD_SET = "SONIC_CLIPPER_SET"
+
+        private const val EXTRA_MSG = "msg"
     }
 
     var mReceiver: BroadcastReceiver? = null
@@ -45,6 +56,8 @@ class SonicKeyboard : InputMethodService() {
         val mInputView: View = layoutInflater.inflate(R.layout.view, null)
         if (mReceiver == null) {
             val filter = IntentFilter(IME_RECOVER_MESSAGE)
+            filter.addAction(IME_RECOVER_CLIPBOARD_GET)
+            filter.addAction(IME_RECOVER_CLIPBOARD_SET)
             mReceiver = AdbReceiver()
             registerReceiver(mReceiver, filter)
         }
@@ -67,8 +80,9 @@ class SonicKeyboard : InputMethodService() {
 
     inner class AdbReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            LogUtils.d(TAG, intent.toString())
             if (intent.action == IME_RECOVER_MESSAGE) {
-                val msg = intent.getStringExtra("msg")
+                val msg = intent.getStringExtra(EXTRA_MSG)
                 val result = msg?.split("CODE_AC_ENTER|CODE_AC_BACK|CODE_AC_CLEAN")
                 result?.let {
                     for (r in it) {
@@ -100,6 +114,45 @@ class SonicKeyboard : InputMethodService() {
                     }
                 }
             }
+            else if (intent.action == IME_RECOVER_CLIPBOARD_GET) {
+                processClipboardGet();
+            } else if (intent.action == IME_RECOVER_CLIPBOARD_SET) {
+                processClipboardSet(intent)
+            }
+        }
+
+        /**
+         * Return the text for clipboard.
+         */
+        private fun processClipboardGet ()    {
+            val cm = Utils.getApp().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = cm.primaryClip
+            if (clip != null && clip.itemCount > 0) {
+                val text = clip.getItemAt(0).coerceToText(Utils.getApp())
+                if (text != null) {
+                    resultCode = Activity.RESULT_OK
+                    resultData = text.toString()
+                    return
+                }
+            }
+            resultCode = Activity.RESULT_CANCELED
+            resultData = ""
+        }
+
+        /**
+         * Copy the text to clipboard.
+         */
+        private fun processClipboardSet(intent: Intent){
+            val text = intent.getStringExtra(EXTRA_MSG)
+            if(text != null) {
+                val cm = Utils.getApp().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(ClipData.newPlainText(Utils.getApp().packageName, text))
+                resultCode = Activity.RESULT_OK
+                resultData = "Text is copied into clipboard."
+                return
+            }
+            resultCode = Activity.RESULT_CANCELED
+            resultData = "No text is provided. Use -e text \"text to be pasted\""
         }
     }
 }
