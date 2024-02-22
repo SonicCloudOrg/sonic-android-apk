@@ -69,19 +69,7 @@ class InputManagerWrapper {
               Int::class.javaPrimitiveType
             );
         }
-        catch (e: NoSuchMethodException) {
-          throw java.lang.UnsupportedOperationException(
-            "InputManagerEventInjector is not supported in this device! " +
-                    "Please submit your deviceInfo to https://github.com/SonicCloudOrg/sonic-android-apk"
-          )
-        }
-        catch (e: InvocationTargetException) {
-          throw java.lang.UnsupportedOperationException(
-            "InputManagerEventInjector is not supported in this device! " +
-                    "Please submit your deviceInfo to https://github.com/SonicCloudOrg/sonic-android-apk"
-          )
-        }
-        catch (e: IllegalAccessException) {
+        catch (e: Exception) {
           throw java.lang.UnsupportedOperationException(
             "InputManagerEventInjector is not supported in this device! " +
                     "Please submit your deviceInfo to https://github.com/SonicCloudOrg/sonic-android-apk"
