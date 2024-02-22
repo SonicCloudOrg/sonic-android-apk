@@ -34,9 +34,13 @@ class InputManagerWrapper {
 
   init {
     eventInjector = try {
-      InputManagerEventInjector()
+      InputManagerGlobalEventInjector()
     } catch (e: UnsupportedOperationException) {
-      WindowManagerEventInjector()
+      try {
+        InputManagerEventInjector()
+      } catch (e: UnsupportedOperationException) {
+        WindowManagerEventInjector()
+      }
     }
   }
 
@@ -46,6 +50,65 @@ class InputManagerWrapper {
 
   private interface EventInjector {
     fun injectInputEvent(event: InputEvent?): Boolean
+  }
+
+  class InputManagerGlobalEventInjector : EventInjector {
+    private val injectMode = 0
+    private var inputManager: Any? = null
+    private var injector: Method? = null
+
+    init {
+        try {
+          var inputManagerGlobal = getInstance("android.hardware.input.InputManagerGlobal");
+          var m = inputManagerGlobal?.javaClass?.getMethod("getInputManagerService");
+          inputManager = m?.invoke(inputManagerGlobal);
+          injector = inputManager?.javaClass
+            ?.getMethod(
+              "injectInputEvent",
+              InputEvent::class.java,
+              Int::class.javaPrimitiveType
+            );
+        }
+        catch (e: NoSuchMethodException) {
+          throw java.lang.UnsupportedOperationException(
+            "InputManagerEventInjector is not supported in this device! " +
+                    "Please submit your deviceInfo to https://github.com/SonicCloudOrg/sonic-android-apk"
+          )
+        }
+        catch (e: InvocationTargetException) {
+          throw java.lang.UnsupportedOperationException(
+            "InputManagerEventInjector is not supported in this device! " +
+                    "Please submit your deviceInfo to https://github.com/SonicCloudOrg/sonic-android-apk"
+          )
+        }
+        catch (e: IllegalAccessException) {
+          throw java.lang.UnsupportedOperationException(
+            "InputManagerEventInjector is not supported in this device! " +
+                    "Please submit your deviceInfo to https://github.com/SonicCloudOrg/sonic-android-apk"
+          )
+        }
+    }
+    private fun getInstance(className: String): Any {
+      val aClass = Class.forName(className)
+      val getInstance = aClass.getMethod("getInstance")
+      return getInstance.invoke(null)
+    }
+    override fun injectInputEvent(event: InputEvent?): Boolean {
+      return try {
+        injector!!.invoke(
+          inputManager,
+          event,
+          injectMode
+        )
+        true
+      } catch (e: IllegalAccessException) {
+        e.printStackTrace()
+        false
+      } catch (e: InvocationTargetException) {
+        e.printStackTrace()
+        false
+      }
+    }
   }
 
   class InputManagerEventInjector : EventInjector {

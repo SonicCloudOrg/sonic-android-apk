@@ -20,6 +20,7 @@ package org.cloud.sonic.android.service
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.graphics.drawable.Icon
 import android.os.*
 import androidx.annotation.RequiresApi
@@ -78,6 +79,14 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
         }
     }
 
+    fun StartForeground(id: Int, notification: Notification) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         LogUtils.i("onCreate")
@@ -91,15 +100,12 @@ class SonicManagerServiceV2 : Service(), TcpServerListener {
                 NotificationManager.IMPORTANCE_NONE
             )
             getNotificationManager().createNotificationChannel(channel)
-            startForeground(
-                NOTIFICATION_ID,
-                notification
-            )
+            StartForeground(NOTIFICATION_ID, notification)
         } else {
             // 获取服务通知
             val notification: Notification = createNotification(false)
             //将服务置于启动状态 ,NOTIFICATION_ID指的是创建的通知的ID
-            startForeground(NOTIFICATION_ID, notification)
+            StartForeground(NOTIFICATION_ID, notification)
         }
     }
 
