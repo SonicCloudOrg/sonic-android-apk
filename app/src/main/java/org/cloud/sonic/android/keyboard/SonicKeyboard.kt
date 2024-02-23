@@ -23,6 +23,7 @@ import android.app.Activity
 import android.content.*
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.inputmethodservice.InputMethodService
+import android.os.Build
 import android.provider.Settings
 import android.view.KeyEvent
 import android.view.View
@@ -61,7 +62,11 @@ class SonicKeyboard : InputMethodService() {
             filter.addAction(IME_RECOVER_CLIPBOARD_GET)
             filter.addAction(IME_RECOVER_CLIPBOARD_SET)
             mReceiver = AdbReceiver()
-            registerReceiver(mReceiver, filter)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                registerReceiver(mReceiver, filter, RECEIVER_EXPORTED)
+            } else {
+                registerReceiver(mReceiver, filter)
+            }
         }
         mInputView.setOnClickListener {
             val intent = Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)

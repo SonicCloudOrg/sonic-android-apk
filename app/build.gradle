@@ -5,12 +5,13 @@ plugins {
 }
 
 android {
-  compileSdk 31
+  compileSdk 34
+  namespace "org.cloud.sonic.android"
 
   defaultConfig {
     applicationId "org.cloud.sonic.android"
     minSdk 21
-    targetSdk 31
+    targetSdk 34
     versionCode 10
     versionName "SONIC_VERSION"
 
